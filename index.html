@@ -3,216 +3,619 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KEYWORD COCKPIT — 네이버 키워드 분석</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+<title>KEYWORD COCKPIT by 뉴카 — 네이버 검색량 분석</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --void: #060810;
-  --panel: #0f1628;
-  --panel2: #141c35;
-  --rim: #1e2a4a;
-  --rim2: #263354;
-  --amber: #f5a623;
-  --amber2: #ffbf47;
-  --amber-dim: rgba(245,166,35,0.12);
-  --amber-glow: 0 0 20px rgba(245,166,35,0.35);
-  --cyan: #00e5ff;
-  --cyan-dim: rgba(0,229,255,0.1);
-  --green: #00ff88;
-  --red: #ff4757;
-  --text: #c8d4f0;
-  --text-dim: #5a6a94;
-  --text-faint: #2e3d66;
+  --bg: #ffffff;
+  --bg2: #f4f4f4;
+  --bg3: #fafafa;
+  --border: #e5e5e5;
+  --border2: #d0d0d0;
+  --blue: #1428a0;
+  --blue2: #1a34c8;
+  --blue-light: #e8ebfc;
+  --blue-pale: #f0f2fd;
+  --text: #1a1a1a;
+  --text2: #444444;
+  --text3: #888888;
+  --green: #00b200;
+  --green-bg: #e6f7e6;
+  --red: #c00;
+  --red-bg: #fff0f0;
+  --amber: #b06000;
+  --amber-bg: #fff8e6;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --radius: 8px;
 }
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html{font-size:14px}
-body{background:var(--void);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;overflow-x:hidden}
-body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);pointer-events:none;z-index:9999}
-.amb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
-.amb1{width:600px;height:600px;background:rgba(245,166,35,0.05);top:-150px;right:-150px}
-.amb2{width:400px;height:400px;background:rgba(0,229,255,0.04);bottom:0;left:-100px}
 
-.cockpit{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:32px 20px 80px}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { font-size: 15px; }
 
-/* Header */
-.hud-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;padding-bottom:18px;border-bottom:1px solid var(--rim);flex-wrap:wrap;gap:14px;animation:fadeIn 0.6s ease both}
-.hud-brand{display:flex;flex-direction:column;gap:5px}
-.hud-id{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--amber);opacity:0.6;text-transform:uppercase}
-.hud-title{font-family:'Space Mono',monospace;font-size:clamp(22px,4vw,34px);font-weight:700;color:#fff;letter-spacing:-1px;line-height:1}
-.hud-title span{color:var(--amber)}
-.hud-sub{font-size:11px;color:var(--text-dim);margin-top:3px;font-weight:300}
-.hud-status{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-.s-row{display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim)}
-.sdot{width:6px;height:6px;border-radius:50%;background:var(--text-faint);flex-shrink:0}
-.sdot.live{background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s infinite}
-.sdot.warn{background:var(--amber);box-shadow:0 0 8px var(--amber)}
-.sdot.err{background:var(--red);box-shadow:0 0 8px var(--red)}
+body {
+  background: var(--bg2);
+  color: var(--text);
+  font-family: 'Noto Sans KR', 'Roboto', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
 
-/* Panel */
-.panel{background:var(--panel);border:1px solid var(--rim);border-radius:4px;position:relative;overflow:hidden;margin-bottom:14px}
-.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:0.35}
-.panel-hd{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--rim);background:var(--panel2)}
-.plabel{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--amber);display:flex;align-items:center;gap:7px}
-.plabel::before{content:'';width:3px;height:3px;background:var(--amber);border-radius:50%;box-shadow:var(--amber-glow)}
-.pbody{padding:18px}
+/* ── Top nav bar ── */
+.topbar {
+  background: var(--blue);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
 
-/* Inputs */
-.finp{background:var(--void);border:1px solid var(--rim2);border-radius:2px;padding:10px 14px;color:var(--amber);font-family:'Space Mono',monospace;font-size:12px;outline:none;transition:all 0.2s;width:100%}
-.finp::placeholder{color:var(--text-faint)}
-.finp:focus{border-color:var(--amber);box-shadow:0 0 0 2px rgba(245,166,35,0.15),inset 0 0 20px rgba(245,166,35,0.03)}
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-/* Buttons */
-.btn{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:2px;cursor:pointer;padding:10px 20px;transition:all 0.15s;white-space:nowrap}
-.btn-a{background:var(--amber);color:#000}
-.btn-a:hover{background:var(--amber2);transform:translateY(-1px);box-shadow:var(--amber-glow)}
-.btn-a:active{transform:translateY(0)}
-.btn-a:disabled{opacity:0.25;cursor:not-allowed;transform:none!important;box-shadow:none!important}
-.btn-g{background:transparent;color:var(--text-dim);border:1px solid var(--rim2)}
-.btn-g:hover{border-color:var(--amber);color:var(--amber)}
-.btn-c{background:transparent;color:var(--cyan);border:1px solid rgba(0,229,255,0.3)}
-.btn-c:hover{background:var(--cyan-dim);border-color:var(--cyan)}
+.topbar-logo {
+  width: 28px;
+  height: 28px;
+  background: #fff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--blue);
+  letter-spacing: -1px;
+  font-family: 'Roboto', sans-serif;
+}
 
-/* Chips */
-.kw-row{display:flex;gap:10px;margin-bottom:12px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:40px;padding:8px 12px;background:var(--void);border:1px dashed var(--rim2);border-radius:2px;margin-bottom:14px;align-items:center;transition:border-color 0.2s}
-.chips.has{border-style:solid;border-color:var(--rim2)}
-.chip{display:inline-flex;align-items:center;gap:5px;background:var(--amber-dim);border:1px solid rgba(245,166,35,0.3);border-radius:2px;padding:4px 10px;font-family:'Space Mono',monospace;font-size:11px;color:var(--amber);animation:chipIn 0.15s ease}
-.chip .rm{cursor:pointer;opacity:0.5;font-size:14px;transition:opacity 0.15s;line-height:1}
-.chip .rm:hover{opacity:1;color:var(--red)}
-.chip-ph{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-faint);letter-spacing:1px}
-.exec-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.kw-ct{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);margin-left:auto}
-.kw-ct b{color:var(--amber)}
+.topbar-name {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
 
-/* Radar */
-.radar-wrap{display:none;padding:48px 20px;align-items:center;justify-content:center;flex-direction:column;gap:16px}
-.radar-wrap.show{display:flex}
-.radar{width:80px;height:80px;border-radius:50%;border:1px solid var(--rim2);position:relative;overflow:hidden}
-.radar::before{content:'';position:absolute;top:50%;left:50%;width:100%;height:100%;background:conic-gradient(from 0deg,transparent 270deg,rgba(0,255,136,0.6) 360deg);transform-origin:0 0;animation:scan 1.2s linear infinite}
-.radar::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,transparent 30%,rgba(0,255,136,0.05) 31%,transparent 32%),radial-gradient(circle at 50% 50%,transparent 60%,rgba(0,255,136,0.04) 61%,transparent 62%)}
-.radar-x{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.radar-x::before,.radar-x::after{content:'';position:absolute;background:rgba(0,255,136,0.15)}
-.radar-x::before{width:100%;height:1px}
-.radar-x::after{width:1px;height:100%}
-.radar-txt{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--green);text-transform:uppercase;animation:pulse 1.2s infinite}
+.topbar-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+  font-weight: 300;
+}
 
-/* Results */
-.results-panel{display:none}
-.results-panel.show{display:block}
-.rhead{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.rmeta{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim)}
-.exp-row{display:flex;gap:8px}
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  flex-shrink: 0;
+}
+.status-dot.live { background: #4cff8f; animation: blink 2.5s infinite; }
+.status-dot.err  { background: #ff6060; }
 
-/* KW card */
-.kwcard{background:var(--panel);border:1px solid var(--rim);border-radius:4px;margin-top:12px;overflow:hidden;animation:slideUp 0.4s ease both;transition:border-color 0.2s}
-.kwcard:hover{border-color:var(--rim2)}
-.kwcard-hd{padding:13px 18px;background:var(--panel2);border-bottom:1px solid var(--rim);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.kwname{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;color:#fff;letter-spacing:-0.5px}
-.cpill{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;padding:3px 10px;border-radius:2px;text-transform:uppercase}
-.c-low{background:rgba(0,255,136,0.12);color:var(--green);border:1px solid rgba(0,255,136,0.3)}
-.c-mid{background:rgba(245,166,35,0.12);color:var(--amber);border:1px solid rgba(245,166,35,0.3)}
-.c-high{background:rgba(255,71,87,0.12);color:var(--red);border:1px solid rgba(255,71,87,0.3)}
-.kwcard-bd{padding:16px 18px}
-.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
-@media(max-width:460px){.sgrid{grid-template-columns:1fr 1fr}}
-.scell{background:var(--void);border:1px solid var(--rim);border-radius:2px;padding:12px 14px;text-align:center}
-.slbl{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}
-.snum{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;letter-spacing:-1px;line-height:1}
-.snum.pc{color:var(--cyan)}
-.snum.mo{color:var(--amber)}
-.snum.tot{color:#fff}
-.sunit{font-family:'Space Mono',monospace;font-size:8px;color:var(--text-dim);margin-top:4px}
-.barchart{margin-bottom:14px}
-.brow{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.bkey{font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);width:20px;text-align:right;flex-shrink:0}
-.btrack{flex:1;height:4px;background:var(--rim);overflow:hidden}
-.bfill{height:100%;transition:width 1s cubic-bezier(0.16,1,0.3,1);position:relative}
-.bfill.pc{background:var(--cyan);box-shadow:0 0 6px rgba(0,229,255,0.5)}
-.bfill.mo{background:var(--amber);box-shadow:0 0 6px rgba(245,166,35,0.5)}
-.bfill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:2px;background:inherit;filter:brightness(2)}
-.bval{font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);width:50px;text-align:right;flex-shrink:0}
-.rel-sec{border-top:1px solid var(--rim);padding-top:12px}
-.rel-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px}
-.rel-list{display:flex;flex-wrap:wrap;gap:6px}
-.rtag{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--rim2);border-radius:2px;padding:4px 10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);cursor:pointer;transition:all 0.15s}
-.rtag:hover{border-color:var(--amber);color:var(--amber);background:var(--amber-dim)}
-.rvol{font-size:9px;color:var(--text-faint)}
+/* ── Layout ── */
+.page {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 28px 16px 80px;
+}
 
-/* Error */
-.errbox{background:rgba(255,71,87,0.06);border:1px solid rgba(255,71,87,0.25);border-radius:4px;padding:20px;margin-top:12px;font-size:12px;line-height:1.8;color:rgba(255,71,87,0.85);display:none}
-.errbox.show{display:block}
-.errbox code{background:var(--void);padding:2px 6px;border-radius:2px;font-family:'Space Mono',monospace;font-size:11px}
+/* ── Hero ── */
+.hero {
+  background: var(--blue);
+  border-radius: var(--radius);
+  padding: 28px 28px 24px;
+  margin-bottom: 16px;
+  color: #fff;
+  animation: fadeUp 0.4s ease both;
+}
 
-/* Console */
-.console{margin-top:14px;background:var(--void);border:1px solid var(--rim);border-radius:4px;padding:11px 16px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);min-height:36px;display:flex;align-items:center;gap:8px;animation:slideUp 0.5s 0.2s ease both}
-.cdot{width:5px;height:5px;border-radius:50%;flex-shrink:0;background:var(--text-faint)}
-.cdot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
-.cdot.busy{background:var(--amber);box-shadow:0 0 6px var(--amber);animation:blink 0.6s infinite}
-.cdot.fail{background:var(--red);box-shadow:0 0 6px var(--red)}
+.hero-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 8px;
+}
 
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@keyframes chipIn{from{opacity:0;transform:scale(0.7)}to{opacity:1;transform:scale(1)}}
-@keyframes scan{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:var(--void)}
-::-webkit-scrollbar-thumb{background:var(--rim2)}
-::-webkit-scrollbar-thumb:hover{background:var(--amber)}
+.hero-title {
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+.hero-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  animation: fadeUp 0.4s ease both;
+}
+
+.card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title::before {
+  content: '';
+  width: 3px;
+  height: 14px;
+  background: var(--blue);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.card-body { padding: 20px; }
+
+/* ── Form elements ── */
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  letter-spacing: 0.3px;
+}
+
+.input {
+  background: var(--bg);
+  border: 1.5px solid var(--border2);
+  border-radius: 6px;
+  padding: 11px 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+.input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(20,40,160,0.1);
+}
+.input::placeholder { color: #bbb; }
+
+/* ── Buttons ── */
+.btn {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 10px 20px;
+  transition: all 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--blue2); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-outline {
+  background: transparent;
+  color: var(--text2);
+  border: 1.5px solid var(--border2);
+}
+.btn-outline:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
+
+.btn-sm { padding: 7px 14px; font-size: 12px; }
+
+/* ── Keyword input row ── */
+.kw-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.kw-row .input { flex: 1; }
+
+/* ── Chips ── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 12px;
+  background: var(--bg2);
+  border: 1.5px dashed var(--border2);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  align-items: center;
+  transition: border-color 0.15s;
+}
+.chips.has { border-style: solid; border-color: var(--border2); background: var(--bg); }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--blue-light);
+  border: 1px solid rgba(20,40,160,0.2);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--blue);
+  animation: chipIn 0.15s ease;
+}
+.chip .rm {
+  cursor: pointer;
+  opacity: 0.5;
+  font-size: 15px;
+  transition: opacity 0.15s;
+  line-height: 1;
+  margin-left: 2px;
+}
+.chip .rm:hover { opacity: 1; color: var(--red); }
+.chip-ph { font-size: 12px; color: #bbb; }
+
+/* ── Execute row ── */
+.exec-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.kw-ct { font-size: 12px; color: var(--text3); }
+.kw-ct b { color: var(--blue); font-weight: 700; }
+
+/* ── Loading ── */
+.loading-wrap {
+  display: none;
+  padding: 48px 20px;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.loading-wrap.show { display: flex; }
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-txt {
+  font-size: 13px;
+  color: var(--text3);
+  font-weight: 300;
+}
+
+/* ── Error ── */
+.errbox {
+  background: var(--red-bg);
+  border: 1px solid rgba(200,0,0,0.2);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--red);
+  display: none;
+}
+.errbox.show { display: block; }
+.errbox code {
+  background: rgba(200,0,0,0.08);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
+/* ── Results ── */
+.results-panel { display: none; }
+.results-panel.show { display: block; }
+
+.results-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.results-meta { font-size: 12px; color: var(--text3); }
+.exp-row { display: flex; gap: 6px; }
+
+/* ── KW result card ── */
+.kwcard {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-top: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  animation: fadeUp 0.35s ease both;
+  transition: box-shadow 0.2s;
+}
+.kwcard:hover { box-shadow: var(--shadow-md); }
+
+.kwcard-head {
+  padding: 14px 20px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.kwname {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.comp-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+.c-low  { background: var(--green-bg);  color: var(--green); }
+.c-mid  { background: var(--amber-bg);  color: var(--amber); }
+.c-high { background: var(--red-bg);    color: var(--red); }
+
+.kwcard-body { padding: 18px 20px; }
+
+/* ── Stat grid ── */
+.sgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+@media(max-width: 480px) { .sgrid { grid-template-columns: 1fr 1fr; } }
+
+.scell {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 12px;
+  text-align: center;
+}
+.slbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.snum {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1;
+  font-family: 'Roboto', sans-serif;
+}
+.snum.pc  { color: var(--blue); }
+.snum.mo  { color: #0099cc; }
+.snum.tot { color: var(--text); }
+.sunit { font-size: 10px; color: var(--text3); margin-top: 4px; }
+
+/* ── Bar chart ── */
+.barchart { margin-bottom: 16px; }
+.brow { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+.bkey {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  width: 22px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.btrack {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.bfill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s cubic-bezier(0.16,1,0.3,1);
+}
+.bfill.pc { background: var(--blue); }
+.bfill.mo { background: #0099cc; }
+.bval {
+  font-size: 11px;
+  color: var(--text3);
+  width: 52px;
+  text-align: right;
+  flex-shrink: 0;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* ── Related ── */
+.rel-sec {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.rel-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.rel-list { display: flex; flex-wrap: wrap; gap: 7px; }
+.rtag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 400;
+}
+.rtag:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
+.rvol { font-size: 10px; color: var(--text3); }
+
+/* ── Console bar ── */
+.console {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--text);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  z-index: 99;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
+}
+.cdot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #555;
+  flex-shrink: 0;
+}
+.cdot.ok   { background: #4cff8f; }
+.cdot.busy { background: #ffc107; animation: blink 0.5s infinite; }
+.cdot.fail { background: #ff6060; }
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .topbar-name { font-size: 14px; }
+  .hero { padding: 20px 16px; }
+  .card-body { padding: 16px; }
+  .kwcard-head { padding: 12px 16px; }
+  .kwcard-body { padding: 14px 16px; }
+}
+
+/* ── Animations ── */
+@keyframes fadeUp  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes chipIn  { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+@keyframes spin    { to{transform:rotate(360deg)} }
+@keyframes blink   { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--blue); }
 </style>
 </head>
 <body>
-<div class="amb amb1"></div>
-<div class="amb amb2"></div>
 
-<div class="cockpit">
+<!-- Top Nav -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">KW</div>
+    <div class="topbar-name">KEYWORD COCKPIT by 뉴카</div>
+  </div>
+  <div class="topbar-status">
+    <div class="status-dot live" id="apiDot"></div>
+    <span id="apiTxt">서버 연결됨</span>
+    &nbsp;·&nbsp;
+    <span id="clock">--:--</span>
+  </div>
+</div>
 
-  <!-- HUD Header -->
-  <div class="hud-top">
-    <div class="hud-brand">
-      <div class="hud-id">NAV-KWD-SYS · v2.2 · PROXY MODE</div>
-      <div class="hud-title">KEYWORD<span>COCKPIT</span></div>
-      <div class="hud-sub">네이버 검색광고 API · 서버 자동 인증 · CORS 완전 해결</div>
-    </div>
-    <div class="hud-status">
-      <div class="s-row">
-        <div class="sdot live" id="apiDot"></div>
-        <span id="apiTxt">SERVER AUTHENTICATED</span>
-      </div>
-      <div class="s-row" style="color:var(--text-faint)">
-        <span id="clock">--:--:--</span>
-      </div>
-    </div>
+<div class="page">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">Naver Search Advertising API</div>
+    <div class="hero-title">네이버 키워드 검색량 분석</div>
+    <div class="hero-sub">키워드를 입력하면 월간 PC·모바일 검색량과 연관 키워드를 즉시 조회합니다.</div>
   </div>
 
-  <!-- Keyword Panel -->
-  <div class="panel" style="animation:slideUp 0.5s 0.1s ease both">
-    <div class="panel-hd">
-      <div class="plabel">KEYWORD TARGETS</div>
-      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text-faint)">MAX 5</div>
+  <!-- Keyword Input Card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">키워드 입력</div>
+      <div style="font-size:12px;color:var(--text3)">최대 5개</div>
     </div>
-    <div class="pbody">
+    <div class="card-body">
       <div class="kw-row">
-        <input class="finp" type="text" id="kwInp" placeholder="키워드 입력 후 ENTER" style="flex:1"
-          onkeydown="if(event.key==='Enter') addKw()" autofocus />
-        <button class="btn btn-g" onclick="addKw()">ADD</button>
-        <button class="btn btn-g" onclick="clearKws()">CLR</button>
+        <input class="input" type="text" id="kwInp"
+          placeholder="키워드 입력 후 Enter 또는 추가 버튼 클릭"
+          onkeydown="if(event.key==='Enter') addKw()"
+          autofocus />
+        <button class="btn btn-outline" onclick="addKw()">추가</button>
+        <button class="btn btn-outline" onclick="clearKws()">초기화</button>
       </div>
+
       <div class="chips" id="chips">
-        <span class="chip-ph">// NO TARGETS LOCKED</span>
+        <span class="chip-ph">추가한 키워드가 여기에 표시됩니다</span>
       </div>
+
       <div class="exec-row">
-        <button class="btn btn-a" id="execBtn" onclick="runScan()" disabled>▶ EXECUTE SCAN</button>
-        <div class="kw-ct"><b id="kwN">0</b> / 5</div>
+        <button class="btn btn-primary" id="execBtn" onclick="runScan()" disabled>
+          검색량 조회
+        </button>
+        <div class="kw-ct"><b id="kwN">0</b> / 5 개 입력됨</div>
       </div>
     </div>
   </div>
 
-  <!-- Radar -->
-  <div class="radar-wrap" id="radarWrap">
-    <div class="radar"><div class="radar-x"></div></div>
-    <div class="radar-txt">SCANNING NAVER DATABASE...</div>
+  <!-- Loading -->
+  <div class="loading-wrap" id="loadingWrap">
+    <div class="spinner"></div>
+    <div class="loading-txt">네이버 데이터베이스에서 검색량을 가져오는 중...</div>
   </div>
 
   <!-- Error -->
@@ -220,27 +623,27 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
   <!-- Results -->
   <div class="results-panel" id="resultsPanel">
-    <div class="panel">
-      <div class="panel-hd">
-        <div class="plabel">SCAN RESULTS</div>
-        <div class="rhead">
-          <div class="rmeta" id="rmeta"></div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">분석 결과</div>
+        <div class="results-topbar">
+          <div class="results-meta" id="rmeta"></div>
           <div class="exp-row">
-            <button class="btn btn-c" onclick="exportCSV()" style="padding:6px 14px;font-size:9px">CSV</button>
-            <button class="btn btn-g" onclick="copyJSON()" style="padding:6px 14px;font-size:9px">JSON</button>
+            <button class="btn btn-outline btn-sm" onclick="exportCSV()">CSV 저장</button>
+            <button class="btn btn-outline btn-sm" onclick="copyJSON()">JSON 복사</button>
           </div>
         </div>
       </div>
-      <div class="pbody" id="resList"></div>
+      <div class="card-body" id="resList"></div>
     </div>
   </div>
 
-  <!-- Console -->
-  <div class="console">
-    <div class="cdot ok" id="cdot"></div>
-    <span id="ctxt">SERVER READY — 키워드를 입력하고 EXECUTE SCAN 클릭</span>
-  </div>
+</div>
 
+<!-- Console bar -->
+<div class="console">
+  <div class="cdot ok" id="cdot"></div>
+  <span id="ctxt">준비 완료 — 키워드를 입력하고 조회하세요</span>
 </div>
 
 <script>
@@ -249,8 +652,9 @@ let data = [];
 
 // Clock
 setInterval(() => {
+  const t = new Date();
   document.getElementById('clock').textContent =
-    new Date().toLocaleTimeString('ko-KR', { hour12:false });
+    t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
 }, 1000);
 
 // Keywords
@@ -258,24 +662,24 @@ function addKw() {
   const inp = document.getElementById('kwInp');
   const kw  = inp.value.trim().replace(/\s+/g, '');
   if (!kw) return;
-  if (kws.includes(kw))  { log('fail','DUPLICATE: ' + kw); inp.value=''; return; }
-  if (kws.length >= 5)   { log('fail','MAX 5 TARGETS'); return; }
+  if (kws.includes(kw))  { log('fail', `"${kw}"는 이미 추가된 키워드입니다`); inp.value=''; return; }
+  if (kws.length >= 5)   { log('fail', '키워드는 최대 5개까지 입력 가능합니다'); return; }
   kws.push(kw);
   inp.value = '';
   renderChips();
-  log('ok', `TARGET LOCKED: ${kw}  (${kws.length}/5)`);
+  log('ok', `"${kw}" 추가됨 (${kws.length}/5)`);
 }
 
 function removeKw(kw) {
   kws = kws.filter(k => k !== kw);
   renderChips();
-  log('', 'TARGET REMOVED: ' + kw);
+  log('', `"${kw}" 삭제됨`);
 }
 
 function clearKws() {
   kws = [];
   renderChips();
-  log('', 'ALL TARGETS CLEARED');
+  log('', '키워드 목록을 초기화했습니다');
 }
 
 function renderChips() {
@@ -283,7 +687,7 @@ function renderChips() {
   document.getElementById('kwN').textContent = kws.length;
   el.classList.toggle('has', kws.length > 0);
   el.innerHTML = kws.length === 0
-    ? '<span class="chip-ph">// NO TARGETS LOCKED</span>'
+    ? '<span class="chip-ph">추가한 키워드가 여기에 표시됩니다</span>'
     : kws.map(k => `
         <div class="chip">
           <span>${k}</span>
@@ -292,11 +696,11 @@ function renderChips() {
   document.getElementById('execBtn').disabled = kws.length === 0;
 }
 
-// Scan — 서버로 키워드만 전송 (인증은 서버 .env에서 자동 처리)
+// Scan
 async function runScan() {
-  log('busy', 'INITIATING SCAN...');
+  log('busy', '데이터를 가져오는 중...');
   document.getElementById('execBtn').disabled = true;
-  document.getElementById('radarWrap').classList.add('show');
+  document.getElementById('loadingWrap').classList.add('show');
   document.getElementById('resultsPanel').classList.remove('show');
   document.getElementById('errBox').classList.remove('show');
 
@@ -304,11 +708,11 @@ async function runScan() {
     const res = await fetch('/api/keyword', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ keywords: kws })  // 키워드만 전송, 인증키는 서버 .env
+      body:    JSON.stringify({ keywords: kws })
     });
 
     const json = await res.json();
-    if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+    if (!res.ok) throw new Error(json.error || `오류 ${res.status}`);
 
     data = (json.keywordList || []).map(d => ({
       kw:     d.relKeyword,
@@ -319,44 +723,46 @@ async function runScan() {
     }));
 
     renderResults();
-    log('ok', `SCAN COMPLETE — ${data.length} RECORDS RETRIEVED`);
+    log('ok', `조회 완료 — 총 ${data.length}개 키워드 데이터`);
 
   } catch(e) {
-    document.getElementById('radarWrap').classList.remove('show');
+    document.getElementById('loadingWrap').classList.remove('show');
     if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
-      showErr(`<strong>⚠ 서버 연결 실패</strong><br><br>터미널에서 서버를 실행하세요:<br><code>node server.js</code><br><br>그 다음 <code>http://localhost:3000</code> 으로 접속하세요.`);
-      log('fail', 'SERVER NOT RUNNING — node server.js 실행 필요');
+      showErr(`<strong>서버에 연결할 수 없습니다.</strong><br>터미널에서 <code>node server.js</code>를 실행한 후 다시 시도하세요.`);
+      log('fail', '서버 연결 실패');
     } else {
-      showErr(`<strong>ERROR:</strong> ${e.message}`);
-      log('fail', 'SCAN FAILED: ' + e.message);
+      showErr(`<strong>오류:</strong> ${e.message}`);
+      log('fail', '조회 실패: ' + e.message);
     }
   } finally {
     document.getElementById('execBtn').disabled = kws.length === 0;
   }
 }
 
-// Render
+// Render results
 function renderResults() {
-  document.getElementById('radarWrap').classList.remove('show');
+  document.getElementById('loadingWrap').classList.remove('show');
   document.getElementById('resultsPanel').classList.add('show');
 
   const main = data.filter(d => d.isHint);
   const rel  = data.filter(d => !d.isHint).sort((a,b) => (b.pc+b.mo)-(a.pc+a.mo));
   const maxT = Math.max(...data.map(d => d.pc+d.mo), 1);
 
+  const now = new Date();
   document.getElementById('rmeta').textContent =
-    `${main.length} PRIMARY · ${rel.length} RELATED · ${new Date().toLocaleTimeString('ko-KR',{hour12:false})}`;
+    `기본 키워드 ${main.length}개 · 연관 키워드 ${rel.length}개 · ${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
 
   document.getElementById('resList').innerHTML =
     main.length ? main.map((d,i) => card(d,i,maxT,rel)).join('')
-    : '<div style="color:var(--text-faint);padding:20px;font-family:Space Mono,monospace;font-size:11px">// NO DATA RETURNED</div>';
+    : '<div style="text-align:center;padding:32px;color:var(--text3);font-size:13px">검색 결과가 없습니다.<br>다른 키워드로 다시 시도해 보세요.</div>';
 
   setTimeout(() => {
     document.querySelectorAll('.bfill[data-w]').forEach(el => el.style.width = el.dataset.w);
   }, 60);
 }
 
-const compMap = {'LOW':'c-low','낮음':'c-low','MID':'c-mid','MEDIUM':'c-mid','중간':'c-mid','HIGH':'c-high','높음':'c-high'};
+const compMap = { 'LOW':'c-low','낮음':'c-low','MID':'c-mid','MEDIUM':'c-mid','중간':'c-mid','HIGH':'c-high','높음':'c-high' };
+const compTxtMap = { 'c-low':'경쟁 낮음', 'c-mid':'경쟁 중간', 'c-high':'경쟁 높음' };
 
 function card(d, i, maxT, rel) {
   const tot   = d.pc + d.mo;
@@ -364,11 +770,11 @@ function card(d, i, maxT, rel) {
   const pcW   = Math.round(d.pc/maxT*100);
   const moW   = Math.round(d.mo/maxT*100);
   const cCls  = compMap[(d.comp||'').toUpperCase?.()] || compMap[d.comp] || 'c-mid';
-  const cTxt  = {'c-low':'LOW','c-mid':'MID','c-high':'HIGH'}[cCls]||'N/A';
+  const cTxt  = compTxtMap[cCls] || 'N/A';
 
   const relHtml = rel.length ? `
     <div class="rel-sec">
-      <div class="rel-lbl">RELATED TARGETS (${Math.min(rel.length,10)})</div>
+      <div class="rel-lbl">연관 키워드 (${Math.min(rel.length,10)}개)</div>
       <div class="rel-list">
         ${rel.slice(0,10).map(r=>`
           <div class="rtag" onclick="addRelated('${r.kw.replace(/'/g,"\\'")}')">
@@ -378,20 +784,40 @@ function card(d, i, maxT, rel) {
     </div>` : '';
 
   return `
-    <div class="kwcard" style="animation-delay:${i*0.07}s">
-      <div class="kwcard-hd">
+    <div class="kwcard" style="animation-delay:${i*0.06}s">
+      <div class="kwcard-head">
         <div class="kwname">${d.kw}</div>
-        <div class="cpill ${cCls}">COMP · ${cTxt}</div>
+        <div class="comp-pill ${cCls}">${cTxt}</div>
       </div>
-      <div class="kwcard-bd">
+      <div class="kwcard-body">
         <div class="sgrid">
-          <div class="scell"><div class="slbl">PC / MONTH</div><div class="snum pc">${fmt(d.pc)}</div><div class="sunit">${pcPct}% share</div></div>
-          <div class="scell"><div class="slbl">MOBILE / MONTH</div><div class="snum mo">${fmt(d.mo)}</div><div class="sunit">${100-pcPct}% share</div></div>
-          <div class="scell"><div class="slbl">TOTAL / MONTH</div><div class="snum tot">${fmt(tot)}</div><div class="sunit">combined</div></div>
+          <div class="scell">
+            <div class="slbl">PC 월간</div>
+            <div class="snum pc">${fmt(d.pc)}</div>
+            <div class="sunit">PC ${pcPct}%</div>
+          </div>
+          <div class="scell">
+            <div class="slbl">모바일 월간</div>
+            <div class="snum mo">${fmt(d.mo)}</div>
+            <div class="sunit">모바일 ${100-pcPct}%</div>
+          </div>
+          <div class="scell">
+            <div class="slbl">합계</div>
+            <div class="snum tot">${fmt(tot)}</div>
+            <div class="sunit">월간 총합</div>
+          </div>
         </div>
         <div class="barchart">
-          <div class="brow"><span class="bkey" style="color:var(--cyan)">PC</span><div class="btrack"><div class="bfill pc" data-w="${pcW}%" style="width:0"></div></div><span class="bval">${fmt(d.pc)}</span></div>
-          <div class="brow"><span class="bkey" style="color:var(--amber)">MO</span><div class="btrack"><div class="bfill mo" data-w="${moW}%" style="width:0"></div></div><span class="bval">${fmt(d.mo)}</span></div>
+          <div class="brow">
+            <span class="bkey">PC</span>
+            <div class="btrack"><div class="bfill pc" data-w="${pcW}%" style="width:0"></div></div>
+            <span class="bval">${fmt(d.pc)}</span>
+          </div>
+          <div class="brow">
+            <span class="bkey">MO</span>
+            <div class="btrack"><div class="bfill mo" data-w="${moW}%" style="width:0"></div></div>
+            <span class="bval">${fmt(d.mo)}</span>
+          </div>
         </div>
         ${relHtml}
       </div>
@@ -399,7 +825,7 @@ function card(d, i, maxT, rel) {
 }
 
 function fmt(n) {
-  if (n >= 10000) return (n/10000).toFixed(1)+'만';
+  if (n >= 10000) return (n/10000).toFixed(1) + '만';
   return n.toLocaleString('ko-KR');
 }
 
@@ -407,7 +833,7 @@ function addRelated(kw) {
   if (kws.includes(kw) || kws.length >= 5) return;
   kws.push(kw);
   renderChips();
-  log('ok','TARGET ADDED: ' + kw);
+  log('ok', `연관 키워드 "${kw}" 추가됨`);
 }
 
 function showErr(html) {
@@ -423,16 +849,20 @@ function log(type, msg) {
 
 function exportCSV() {
   if (!data.length) return;
-  const rows = [['키워드','PC월간','모바일월간','합계','경쟁도']];
+  const rows = [['키워드','PC 월간','모바일 월간','합계','경쟁도']];
   data.forEach(d => rows.push([d.kw, d.pc, d.mo, d.pc+d.mo, d.comp]));
   const blob = new Blob(['\uFEFF'+rows.map(r=>r.join(',')).join('\n')], {type:'text/csv;charset=utf-8;'});
-  Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:`kw-cockpit-${Date.now()}.csv`}).click();
-  log('ok','CSV EXPORTED');
+  Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(blob),
+    download: `키워드분석_${new Date().toISOString().slice(0,10)}.csv`
+  }).click();
+  log('ok', 'CSV 파일로 저장됐습니다');
 }
 
 function copyJSON() {
   if (!data.length) return;
-  navigator.clipboard.writeText(JSON.stringify(data,null,2)).then(() => log('ok','JSON COPIED TO CLIPBOARD'));
+  navigator.clipboard.writeText(JSON.stringify(data,null,2))
+    .then(() => log('ok', 'JSON이 클립보드에 복사됐습니다'));
 }
 </script>
 </body>
