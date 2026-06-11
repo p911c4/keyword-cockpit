@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KEYWORD COCKPIT by 뉴카 — 네이버 검색량 분석</title>
+<title>KEYWORD COCKPIT by 뉴카</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -27,710 +27,163 @@
   --amber-bg: #fff8e6;
   --shadow-sm: 0 1px 4px rgba(0,0,0,0.08);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
   --radius: 8px;
 }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:15px}
+body{background:var(--bg2);color:var(--text);font-family:'Noto Sans KR','Roboto',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
 
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { font-size: 15px; }
+/* Top nav */
+.topbar{background:var(--blue);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.topbar-brand{display:flex;align-items:center;gap:10px}
+.topbar-logo{width:28px;height:28px;background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--blue);letter-spacing:-1px;font-family:'Roboto',sans-serif}
+.topbar-name{color:#fff;font-size:16px;font-weight:700;letter-spacing:-0.3px}
+.topbar-status{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.75);font-weight:300}
+.status-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.3);flex-shrink:0}
+.status-dot.live{background:#4cff8f;animation:blink 2.5s infinite}
+.status-dot.err{background:#ff6060}
 
-body {
-  background: var(--bg2);
-  color: var(--text);
-  font-family: 'Noto Sans KR', 'Roboto', sans-serif;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
+/* Layout */
+.page{max-width:780px;margin:0 auto;padding:28px 16px 80px}
 
-/* ── Top nav bar ── */
-.topbar {
-  background: var(--blue);
-  padding: 0 24px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
+/* Hero */
+.hero{background:var(--blue);border-radius:var(--radius);padding:28px 28px 24px;margin-bottom:16px;color:#fff;animation:fadeUp 0.4s ease both}
+.hero-eyebrow{font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:8px}
+.hero-title{font-size:clamp(22px,4vw,30px);font-weight:700;line-height:1.2;letter-spacing:-0.5px;margin-bottom:6px}
+.hero-sub{font-size:13px;color:rgba(255,255,255,0.7);font-weight:300;line-height:1.6}
 
-.topbar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+/* Card */
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;box-shadow:var(--shadow-sm);overflow:hidden;animation:fadeUp 0.4s ease both}
+.card-header{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:700;color:var(--text);letter-spacing:0.2px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:3px;height:14px;background:var(--blue);border-radius:2px;flex-shrink:0}
+.card-body{padding:20px}
 
-.topbar-logo {
-  width: 28px;
-  height: 28px;
-  background: #fff;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 900;
-  color: var(--blue);
-  letter-spacing: -1px;
-  font-family: 'Roboto', sans-serif;
-}
+/* Input */
+.kw-row{display:flex;gap:8px}
+.input{background:var(--bg);border:1.5px solid var(--border2);border-radius:6px;padding:11px 14px;font-family:'Noto Sans KR',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color 0.15s,box-shadow 0.15s;width:100%}
+.input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(20,40,160,0.1)}
+.input::placeholder{color:#bbb}
 
-.topbar-name {
-  color: #fff;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
+/* Buttons */
+.btn{font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;border:none;border-radius:6px;cursor:pointer;padding:10px 20px;transition:all 0.15s;white-space:nowrap;letter-spacing:0.2px}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue2);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0)}
+.btn-outline{background:transparent;color:var(--text2);border:1.5px solid var(--border2)}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-pale)}
+.btn-sm{padding:7px 14px;font-size:12px}
 
-.topbar-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: rgba(255,255,255,0.75);
-  font-weight: 300;
-}
+/* Loading */
+.loading-wrap{display:none;padding:48px 20px;flex-direction:column;align-items:center;gap:16px}
+.loading-wrap.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite}
+.loading-txt{font-size:13px;color:var(--text3);font-weight:300}
 
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.3);
-  flex-shrink: 0;
-}
-.status-dot.live { background: #4cff8f; animation: blink 2.5s infinite; }
-.status-dot.err  { background: #ff6060; }
+/* Error */
+.errbox{background:var(--red-bg);border:1px solid rgba(200,0,0,0.2);border-radius:var(--radius);padding:16px 20px;margin-bottom:14px;font-size:13px;line-height:1.7;color:var(--red);display:none}
+.errbox.show{display:block}
+.errbox code{background:rgba(200,0,0,0.08);padding:1px 6px;border-radius:3px;font-size:12px;font-family:monospace}
 
-/* ── Layout ── */
-.page {
-  max-width: 780px;
-  margin: 0 auto;
-  padding: 28px 16px 80px;
-}
+/* Results */
+.results-panel{display:none}
+.results-panel.show{display:block}
+.results-topbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:2px}
+.results-meta{font-size:12px;color:var(--text3)}
+.exp-row{display:flex;gap:6px}
 
-/* ── Hero ── */
-.hero {
-  background: var(--blue);
-  border-radius: var(--radius);
-  padding: 28px 28px 24px;
-  margin-bottom: 16px;
-  color: #fff;
-  animation: fadeUp 0.4s ease both;
-}
+/* KW card */
+.kwcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);margin-top:12px;overflow:hidden;box-shadow:var(--shadow-sm);animation:fadeUp 0.35s ease both;transition:box-shadow 0.2s}
+.kwcard:hover{box-shadow:var(--shadow-md)}
+.kwcard-head{padding:14px 20px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.kwname{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-0.3px}
+.comp-pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.3px}
+.c-low{background:var(--green-bg);color:var(--green)}
+.c-mid{background:var(--amber-bg);color:var(--amber)}
+.c-high{background:var(--red-bg);color:var(--red)}
+.kwcard-body{padding:18px 20px}
 
-.hero-eyebrow {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.6);
-  margin-bottom: 8px;
-}
+/* Stat grid */
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:480px){.sgrid{grid-template-columns:1fr 1fr}}
+.scell{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 12px;text-align:center}
+.slbl{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px}
+.snum{font-size:26px;font-weight:700;letter-spacing:-1px;line-height:1;font-family:'Roboto',sans-serif}
+.snum.pc{color:var(--blue)}
+.snum.mo{color:#0099cc}
+.snum.tot{color:var(--text)}
+.sunit{font-size:10px;color:var(--text3);margin-top:4px}
 
-.hero-title {
-  font-size: clamp(22px, 4vw, 30px);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.5px;
-  margin-bottom: 6px;
-}
+/* Bar */
+.barchart{margin-bottom:16px}
+.brow{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.bkey{font-size:11px;font-weight:600;color:var(--text3);width:22px;text-align:right;flex-shrink:0}
+.btrack{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.bfill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(0.16,1,0.3,1)}
+.bfill.pc{background:var(--blue)}
+.bfill.mo{background:#0099cc}
+.bval{font-size:11px;color:var(--text3);width:52px;text-align:right;flex-shrink:0;font-family:'Roboto',sans-serif}
 
-.hero-sub {
-  font-size: 13px;
-  color: rgba(255,255,255,0.7);
-  font-weight: 300;
-  line-height: 1.6;
-}
+/* Related */
+.rel-sec{border-top:1px solid var(--border);padding-top:14px}
+.rel-lbl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px}
+.rel-list{display:flex;flex-wrap:wrap;gap:7px}
+.rtag{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text2);cursor:pointer;transition:all 0.15s;font-weight:400}
+.rtag:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-pale)}
+.rvol{font-size:10px;color:var(--text3)}
 
-/* ── Card ── */
-.card {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 14px;
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  animation: fadeUp 0.4s ease both;
-}
+/* 뉴카 포스팅 박스 */
+.mypost-sec{border:1.5px solid rgba(20,40,160,0.2);background:var(--blue-pale);border-radius:8px;padding:14px 16px;margin-top:20px;margin-bottom:10px}
+.mypost-lbl{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:0.3px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.mypost-list{display:flex;flex-direction:column;gap:6px}
+.mypost-item{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;background:#fff;border:1px solid rgba(20,40,160,0.12);border-radius:6px;text-decoration:none;transition:all 0.15s}
+.mypost-item:hover{border-color:var(--blue);box-shadow:0 2px 8px rgba(20,40,160,0.1)}
+.mypost-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.mypost-info{flex:1;min-width:0}
+.mypost-title{font-size:13px;font-weight:500;color:var(--text);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.mypost-item:hover .mypost-title{color:var(--blue)}
+.mypost-desc{font-size:11px;color:var(--text3);margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.mypost-empty{font-size:12px;color:var(--text3);padding:4px 0}
+.mypost-loading{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:6px}
 
-.card-header {
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg3);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+/* Rank / Blog posts */
+.rank-sec{border-top:1px solid var(--border);padding-top:14px;margin-top:14px}
+.rank-lbl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.rank-load-btn{font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:600;color:var(--blue);background:var(--blue-pale);border:1px solid rgba(20,40,160,0.2);border-radius:4px;padding:3px 10px;cursor:pointer;transition:all 0.15s}
+.rank-load-btn:hover{background:var(--blue);color:#fff}
+.rank-load-btn:disabled{opacity:0.5;cursor:not-allowed}
+.rank-list{display:flex;flex-direction:column;gap:6px}
+.rank-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;text-decoration:none;transition:all 0.15s}
+.rank-item:hover{border-color:var(--blue);background:var(--blue-pale)}
+.rank-num{font-size:12px;font-weight:700;color:#fff;background:var(--blue);border-radius:4px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Roboto',sans-serif}
+.rank-info{flex:1;min-width:0}
+.rank-title{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;margin-bottom:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.rank-item:hover .rank-title{color:var(--blue)}
+.rank-desc{font-size:11px;color:var(--text3);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.rank-blogger{font-size:10px;color:var(--text3);margin-top:2px}
+.rank-empty{font-size:12px;color:var(--text3);padding:12px;text-align:center}
+.rank-loading{font-size:12px;color:var(--text3);padding:12px;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px}
+.rank-spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
 
-.card-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: 0.2px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+/* Console */
+.console{position:fixed;bottom:0;left:0;right:0;background:var(--text);padding:10px 20px;display:flex;align-items:center;gap:10px;font-size:12px;color:rgba(255,255,255,0.7);z-index:99;box-shadow:0 -2px 12px rgba(0,0,0,0.15)}
+.cdot{width:6px;height:6px;border-radius:50%;background:#555;flex-shrink:0}
+.cdot.ok{background:#4cff8f}
+.cdot.busy{background:#ffc107;animation:blink 0.5s infinite}
+.cdot.fail{background:#ff6060}
 
-.card-title::before {
-  content: '';
-  width: 3px;
-  height: 14px;
-  background: var(--blue);
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-.card-body { padding: 20px; }
-
-/* ── Form elements ── */
-.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-.field:last-child { margin-bottom: 0; }
-.field-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text2);
-  letter-spacing: 0.3px;
-}
-
-.input {
-  background: var(--bg);
-  border: 1.5px solid var(--border2);
-  border-radius: 6px;
-  padding: 11px 14px;
-  font-family: 'Noto Sans KR', sans-serif;
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  width: 100%;
-}
-.input:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(20,40,160,0.1);
-}
-.input::placeholder { color: #bbb; }
-
-/* ── Buttons ── */
-.btn {
-  font-family: 'Noto Sans KR', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  padding: 10px 20px;
-  transition: all 0.15s;
-  white-space: nowrap;
-  letter-spacing: 0.2px;
-}
-
-.btn-primary {
-  background: var(--blue);
-  color: #fff;
-}
-.btn-primary:hover { background: var(--blue2); box-shadow: var(--shadow-md); transform: translateY(-1px); }
-.btn-primary:active { transform: translateY(0); }
-.btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
-
-.btn-outline {
-  background: transparent;
-  color: var(--text2);
-  border: 1.5px solid var(--border2);
-}
-.btn-outline:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
-
-.btn-sm { padding: 7px 14px; font-size: 12px; }
-
-/* ── Keyword input row ── */
-.kw-row { display: flex; gap: 8px; margin-bottom: 12px; }
-.kw-row .input { flex: 1; }
-
-/* ── Chips ── */
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  min-height: 42px;
-  padding: 8px 12px;
-  background: var(--bg2);
-  border: 1.5px dashed var(--border2);
-  border-radius: 6px;
-  margin-bottom: 16px;
-  align-items: center;
-  transition: border-color 0.15s;
-}
-.chips.has { border-style: solid; border-color: var(--border2); background: var(--bg); }
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--blue-light);
-  border: 1px solid rgba(20,40,160,0.2);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--blue);
-  animation: chipIn 0.15s ease;
-}
-.chip .rm {
-  cursor: pointer;
-  opacity: 0.5;
-  font-size: 15px;
-  transition: opacity 0.15s;
-  line-height: 1;
-  margin-left: 2px;
-}
-.chip .rm:hover { opacity: 1; color: var(--red); }
-.chip-ph { font-size: 12px; color: #bbb; }
-
-/* ── Execute row ── */
-.exec-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.kw-ct { font-size: 12px; color: var(--text3); }
-.kw-ct b { color: var(--blue); font-weight: 700; }
-
-/* ── Loading ── */
-.loading-wrap {
-  display: none;
-  padding: 48px 20px;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-.loading-wrap.show { display: flex; }
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--border);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-.loading-txt {
-  font-size: 13px;
-  color: var(--text3);
-  font-weight: 300;
-}
-
-/* ── Error ── */
-.errbox {
-  background: var(--red-bg);
-  border: 1px solid rgba(200,0,0,0.2);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  margin-bottom: 14px;
-  font-size: 13px;
-  line-height: 1.7;
-  color: var(--red);
-  display: none;
-}
-.errbox.show { display: block; }
-.errbox code {
-  background: rgba(200,0,0,0.08);
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-size: 12px;
-  font-family: monospace;
-}
-
-/* ── Results ── */
-.results-panel { display: none; }
-.results-panel.show { display: block; }
-
-.results-topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 2px;
-}
-
-.results-meta { font-size: 12px; color: var(--text3); }
-.exp-row { display: flex; gap: 6px; }
-
-/* ── KW result card ── */
-.kwcard {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-top: 12px;
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  animation: fadeUp 0.35s ease both;
-  transition: box-shadow 0.2s;
-}
-.kwcard:hover { box-shadow: var(--shadow-md); }
-
-.kwcard-head {
-  padding: 14px 20px;
-  background: var(--bg3);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.kwname {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.3px;
-}
-
-.comp-pill {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 20px;
-  letter-spacing: 0.3px;
-}
-.c-low  { background: var(--green-bg);  color: var(--green); }
-.c-mid  { background: var(--amber-bg);  color: var(--amber); }
-.c-high { background: var(--red-bg);    color: var(--red); }
-
-.kwcard-body { padding: 18px 20px; }
-
-/* ── Stat grid ── */
-.sgrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 16px;
-}
-@media(max-width: 480px) { .sgrid { grid-template-columns: 1fr 1fr; } }
-
-.scell {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 14px 12px;
-  text-align: center;
-}
-.slbl {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text3);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-.snum {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -1px;
-  line-height: 1;
-  font-family: 'Roboto', sans-serif;
-}
-.snum.pc  { color: var(--blue); }
-.snum.mo  { color: #0099cc; }
-.snum.tot { color: var(--text); }
-.sunit { font-size: 10px; color: var(--text3); margin-top: 4px; }
-
-/* ── Bar chart ── */
-.barchart { margin-bottom: 16px; }
-.brow { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
-.bkey {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text3);
-  width: 22px;
-  text-align: right;
-  flex-shrink: 0;
-}
-.btrack {
-  flex: 1;
-  height: 6px;
-  background: var(--border);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.bfill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 1s cubic-bezier(0.16,1,0.3,1);
-}
-.bfill.pc { background: var(--blue); }
-.bfill.mo { background: #0099cc; }
-.bval {
-  font-size: 11px;
-  color: var(--text3);
-  width: 52px;
-  text-align: right;
-  flex-shrink: 0;
-  font-family: 'Roboto', sans-serif;
-}
-
-/* ── Related ── */
-.rel-sec {
-  border-top: 1px solid var(--border);
-  padding-top: 14px;
-}
-.rel-lbl {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 10px;
-}
-.rel-list { display: flex; flex-wrap: wrap; gap: 7px; }
-.rtag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--bg2);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  padding: 5px 12px;
-  font-size: 12px;
-  color: var(--text2);
-  cursor: pointer;
-  transition: all 0.15s;
-  font-weight: 400;
-}
-.rtag:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
-.rvol { font-size: 10px; color: var(--text3); }
-
-/* ── Console bar ── */
-.console {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: var(--text);
-  padding: 10px 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  color: rgba(255,255,255,0.7);
-  z-index: 99;
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
-}
-.cdot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: #555;
-  flex-shrink: 0;
-}
-.cdot.ok   { background: #4cff8f; }
-.cdot.busy { background: #ffc107; animation: blink 0.5s infinite; }
-.cdot.fail { background: #ff6060; }
-
-/* ── Divider ── */
-.divider {
-  height: 1px;
-  background: var(--border);
-  margin: 16px 0;
-}
-
-/* ── Responsive ── */
-@media (max-width: 600px) {
-  .topbar-name { font-size: 14px; }
-  .hero { padding: 20px 16px; }
-  .card-body { padding: 16px; }
-  .kwcard-head { padding: 12px 16px; }
-  .kwcard-body { padding: 14px 16px; }
-}
-
-/* ── 뉴카 연관 포스팅 박스 ── */
-.mypost-sec {
-  border: 1.5px solid rgba(20,40,160,0.2);
-  background: var(--blue-pale);
-  border-radius: 8px;
-  padding: 14px 16px;
-  margin-top: 20px;
-  margin-bottom: 10px;
-}
-.mypost-lbl {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--blue);
-  letter-spacing: 0.3px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.mypost-list { display: flex; flex-direction: column; gap: 6px; }
-.mypost-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  background: #fff;
-  border: 1px solid rgba(20,40,160,0.12);
-  border-radius: 6px;
-  text-decoration: none;
-  transition: all 0.15s;
-}
-.mypost-item:hover { border-color: var(--blue); box-shadow: 0 2px 8px rgba(20,40,160,0.1); }
-.mypost-icon { font-size: 14px; flex-shrink: 0; }
-.mypost-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.mypost-item:hover .mypost-title { color: var(--blue); }
-.mypost-info { flex: 1; min-width: 0; }
-.mypost-desc {
-  font-size: 11px;
-  color: var(--text3);
-  margin-top: 2px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.mypost-empty { font-size: 12px; color: var(--text3); padding: 4px 0; }
-.mypost-loading {
-  font-size: 12px; color: var(--text3);
-  display: flex; align-items: center; gap: 6px;
-}
-
-/* ── Rank / Blog posts ── */
-.rank-sec {
-  border-top: 1px solid var(--border);
-  padding-top: 14px;
-  margin-top: 14px;
-}
-.rank-lbl {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.rank-load-btn {
-  font-family: 'Noto Sans KR', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--blue);
-  background: var(--blue-pale);
-  border: 1px solid rgba(20,40,160,0.2);
-  border-radius: 4px;
-  padding: 3px 10px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.rank-load-btn:hover { background: var(--blue); color: #fff; }
-.rank-load-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.rank-list { display: flex; flex-direction: column; gap: 6px; }
-
-.rank-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  text-decoration: none;
-  transition: all 0.15s;
-}
-.rank-item:hover { border-color: var(--blue); background: var(--blue-pale); }
-
-.rank-num {
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--blue);
-  border-radius: 4px;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-family: 'Roboto', sans-serif;
-}
-
-.rank-info { flex: 1; min-width: 0; }
-.rank-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  line-height: 1.4;
-  margin-bottom: 3px;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-.rank-item:hover .rank-title { color: var(--blue); }
-.rank-desc {
-  font-size: 11px;
-  color: var(--text3);
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.rank-blogger {
-  font-size: 10px;
-  color: var(--text3);
-  margin-top: 2px;
-}
-
-.rank-empty {
-  font-size: 12px;
-  color: var(--text3);
-  padding: 12px;
-  text-align: center;
-}
-.rank-loading {
-  font-size: 12px;
-  color: var(--text3);
-  padding: 12px;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.rank-spinner {
-  width: 14px; height: 14px;
-  border: 2px solid var(--border);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
-
-/* ── Animations ── */
-@keyframes fadeUp  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-@keyframes chipIn  { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
-@keyframes spin    { to{transform:rotate(360deg)} }
-@keyframes blink   { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--bg2); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--blue); }
+@media(max-width:600px){.topbar-name{font-size:14px}.hero{padding:20px 16px}.card-body{padding:16px}.kwcard-head{padding:12px 16px}.kwcard-body{padding:14px 16px}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--blue)}
 </style>
 </head>
 <body>
 
-<!-- Top Nav -->
 <div class="topbar">
   <div class="topbar-brand">
     <div class="topbar-logo">KW</div>
@@ -746,52 +199,35 @@ body {
 
 <div class="page">
 
-  <!-- Hero -->
   <div class="hero">
     <div class="hero-eyebrow">Naver Search Advertising API</div>
-    <div class="hero-title">네이버 키워드 검색량 분석 v1.2</div>
+    <div class="hero-title">네이버 키워드 검색량 분석 v1.3</div>
     <div class="hero-sub">키워드를 입력하면 월간 PC·모바일 검색량과 연관 키워드를 즉시 조회합니다.</div>
   </div>
 
-  <!-- Keyword Input Card -->
   <div class="card">
     <div class="card-header">
       <div class="card-title">키워드 입력</div>
-      <div style="font-size:12px;color:var(--text3)">최대 5개</div>
+      <div style="font-size:12px;color:var(--text3)">키워드 1개</div>
     </div>
     <div class="card-body">
       <div class="kw-row">
         <input class="input" type="text" id="kwInp"
-          placeholder="키워드 입력 후 Enter 또는 추가 버튼 클릭"
-          onkeydown="if(event.key==='Enter') addKw()"
+          placeholder="키워드 입력 후 Enter 또는 검색 버튼 클릭"
+          onkeydown="if(event.key==='Enter') doSearch()"
           autofocus />
-        <button class="btn btn-outline" onclick="addKw()">추가</button>
-        <button class="btn btn-outline" onclick="clearKws()">초기화</button>
-      </div>
-
-      <div class="chips" id="chips">
-        <span class="chip-ph">추가한 키워드가 여기에 표시됩니다</span>
-      </div>
-
-      <div class="exec-row">
-        <button class="btn btn-primary" id="execBtn" onclick="runScan()" disabled>
-          검색량 조회
-        </button>
-        <div class="kw-ct"><b id="kwN">0</b> / 5 개 입력됨</div>
+        <button class="btn btn-primary" onclick="doSearch()">검색</button>
       </div>
     </div>
   </div>
 
-  <!-- Loading -->
   <div class="loading-wrap" id="loadingWrap">
     <div class="spinner"></div>
     <div class="loading-txt">네이버 데이터베이스에서 검색량을 가져오는 중...</div>
   </div>
 
-  <!-- Error -->
   <div class="errbox" id="errBox"></div>
 
-  <!-- Results -->
   <div class="results-panel" id="resultsPanel">
     <div class="card">
       <div class="card-header">
@@ -810,66 +246,33 @@ body {
 
 </div>
 
-<!-- Console bar -->
 <div class="console">
   <div class="cdot ok" id="cdot"></div>
-  <span id="ctxt">준비 완료 — 키워드를 입력하고 조회하세요</span>
+  <span id="ctxt">준비 완료 — 키워드를 입력하고 검색하세요</span>
 </div>
 
 <script>
 let kws  = [];
 let data = [];
 
-// Clock
 setInterval(() => {
   const t = new Date();
   document.getElementById('clock').textContent =
     t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
 }, 1000);
 
-// Keywords
-function addKw() {
+function doSearch() {
   const inp = document.getElementById('kwInp');
   const kw  = inp.value.trim().replace(/\s+/g, '');
   if (!kw) return;
-  if (kws.includes(kw))  { log('fail', `"${kw}"는 이미 추가된 키워드입니다`); inp.value=''; return; }
-  if (kws.length >= 5)   { log('fail', '키워드는 최대 5개까지 입력 가능합니다'); return; }
-  kws.push(kw);
+  kws = [kw];
   inp.value = '';
-  renderChips();
-  log('ok', `"${kw}" 추가됨 (${kws.length}/5)`);
+  log('busy', `"${kw}" 검색 중...`);
+  runScan();
 }
 
-function removeKw(kw) {
-  kws = kws.filter(k => k !== kw);
-  renderChips();
-  log('', `"${kw}" 삭제됨`);
-}
-
-function clearKws() {
-  kws = [];
-  renderChips();
-  log('', '키워드 목록을 초기화했습니다');
-}
-
-function renderChips() {
-  const el = document.getElementById('chips');
-  document.getElementById('kwN').textContent = kws.length;
-  el.classList.toggle('has', kws.length > 0);
-  el.innerHTML = kws.length === 0
-    ? '<span class="chip-ph">추가한 키워드가 여기에 표시됩니다</span>'
-    : kws.map(k => `
-        <div class="chip">
-          <span>${k}</span>
-          <span class="rm" onclick="removeKw('${k.replace(/'/g,"\\'")}')">×</span>
-        </div>`).join('');
-  document.getElementById('execBtn').disabled = kws.length === 0;
-}
-
-// Scan
 async function runScan() {
   log('busy', '데이터를 가져오는 중...');
-  document.getElementById('execBtn').disabled = true;
   document.getElementById('loadingWrap').classList.add('show');
   document.getElementById('resultsPanel').classList.remove('show');
   document.getElementById('errBox').classList.remove('show');
@@ -880,7 +283,6 @@ async function runScan() {
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ keywords: kws })
     });
-
     const json = await res.json();
     if (!res.ok) throw new Error(json.error || `오류 ${res.status}`);
 
@@ -904,12 +306,9 @@ async function runScan() {
       showErr(`<strong>오류:</strong> ${e.message}`);
       log('fail', '조회 실패: ' + e.message);
     }
-  } finally {
-    document.getElementById('execBtn').disabled = kws.length === 0;
   }
 }
 
-// Render results
 function renderResults() {
   document.getElementById('loadingWrap').classList.remove('show');
   document.getElementById('resultsPanel').classList.add('show');
@@ -928,7 +327,6 @@ function renderResults() {
 
   setTimeout(() => {
     document.querySelectorAll('.bfill[data-w]').forEach(el => el.style.width = el.dataset.w);
-    // 뉴카 연관 포스팅 자동 로드
     main.forEach(d => {
       const mypostId = 'my-' + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
       loadMyPosts(d.kw, mypostId);
@@ -936,8 +334,8 @@ function renderResults() {
   }, 60);
 }
 
-const compMap = { 'LOW':'c-low','낮음':'c-low','MID':'c-mid','MEDIUM':'c-mid','중간':'c-mid','HIGH':'c-high','높음':'c-high' };
-const compTxtMap = { 'c-low':'경쟁 낮음', 'c-mid':'경쟁 중간', 'c-high':'경쟁 높음' };
+const compMap = {'LOW':'c-low','낮음':'c-low','MID':'c-mid','MEDIUM':'c-mid','중간':'c-mid','HIGH':'c-high','높음':'c-high'};
+const compTxtMap = {'c-low':'경쟁 낮음','c-mid':'경쟁 중간','c-high':'경쟁 높음'};
 
 function card(d, i, maxT, rel) {
   const tot   = d.pc + d.mo;
@@ -946,38 +344,19 @@ function card(d, i, maxT, rel) {
   const moW   = Math.round(d.mo/maxT*100);
   const cCls  = compMap[(d.comp||'').toUpperCase?.()] || compMap[d.comp] || 'c-mid';
   const cTxt  = compTxtMap[cCls] || 'N/A';
+  const rankId   = 'rank-' + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
+  const mypostId = 'my-'   + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
 
   const relHtml = rel.length ? `
     <div class="rel-sec">
       <div class="rel-lbl">연관 키워드 (${Math.min(rel.length,10)}개)</div>
       <div class="rel-list">
         ${rel.slice(0,10).map(r=>`
-          <div class="rtag" onclick="addRelated('${r.kw.replace(/'/g,"\\'")}')">
+          <div class="rtag" onclick="searchRelated('${r.kw.replace(/'/g,"\\'")}')">
             ${r.kw}<span class="rvol">${fmt(r.pc+r.mo)}</span>
           </div>`).join('')}
       </div>
     </div>` : '';
-
-  // 뉴카 연관 포스팅 + 네이버 블로그 상위 포스팅
-  const rankId   = 'rank-' + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
-  const mypostId = 'my-'   + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
-  const rankHtml = `
-    <div class="mypost-sec">
-      <div class="mypost-lbl">🔖 뉴카 포스팅</div>
-      <div class="mypost-list" id="${mypostId}">
-        <div class="mypost-loading"><div class="rank-spinner"></div>불러오는 중...</div>
-      </div>
-    </div>
-    <div class="rank-sec">
-      <div class="rank-lbl">
-        <span>네이버 블로그 상위 포스팅</span>
-        <button class="rank-load-btn" id="btn-${rankId}" onclick="loadBlogPosts('${d.kw.replace(/'/g,"\'")}','${rankId}')">불러오기</button>
-      </div>
-      <div class="rank-list" id="${rankId}">
-        <div class="rank-empty">위 버튼을 클릭하면 상위 포스팅 10개를 가져옵니다</div>
-      </div>
-    </div>`;
-
 
   return `
     <div class="kwcard" style="animation-delay:${i*0.06}s">
@@ -987,50 +366,106 @@ function card(d, i, maxT, rel) {
       </div>
       <div class="kwcard-body">
         <div class="sgrid">
-          <div class="scell">
-            <div class="slbl">PC 월간</div>
-            <div class="snum pc">${fmt(d.pc)}</div>
-            <div class="sunit">PC ${pcPct}%</div>
-          </div>
-          <div class="scell">
-            <div class="slbl">모바일 월간</div>
-            <div class="snum mo">${fmt(d.mo)}</div>
-            <div class="sunit">모바일 ${100-pcPct}%</div>
-          </div>
-          <div class="scell">
-            <div class="slbl">합계</div>
-            <div class="snum tot">${fmt(tot)}</div>
-            <div class="sunit">월간 총합</div>
-          </div>
+          <div class="scell"><div class="slbl">PC 월간</div><div class="snum pc">${fmt(d.pc)}</div><div class="sunit">PC ${pcPct}%</div></div>
+          <div class="scell"><div class="slbl">모바일 월간</div><div class="snum mo">${fmt(d.mo)}</div><div class="sunit">모바일 ${100-pcPct}%</div></div>
+          <div class="scell"><div class="slbl">합계</div><div class="snum tot">${fmt(tot)}</div><div class="sunit">월간 총합</div></div>
         </div>
         <div class="barchart">
-          <div class="brow">
-            <span class="bkey">PC</span>
-            <div class="btrack"><div class="bfill pc" data-w="${pcW}%" style="width:0"></div></div>
-            <span class="bval">${fmt(d.pc)}</span>
-          </div>
-          <div class="brow">
-            <span class="bkey">MO</span>
-            <div class="btrack"><div class="bfill mo" data-w="${moW}%" style="width:0"></div></div>
-            <span class="bval">${fmt(d.mo)}</span>
-          </div>
+          <div class="brow"><span class="bkey">PC</span><div class="btrack"><div class="bfill pc" data-w="${pcW}%" style="width:0"></div></div><span class="bval">${fmt(d.pc)}</span></div>
+          <div class="brow"><span class="bkey">MO</span><div class="btrack"><div class="bfill mo" data-w="${moW}%" style="width:0"></div></div><span class="bval">${fmt(d.mo)}</span></div>
         </div>
         ${relHtml}
-        ${rankHtml}
+        <div class="mypost-sec">
+          <div class="mypost-lbl">🔖 뉴카 포스팅</div>
+          <div class="mypost-list" id="${mypostId}">
+            <div class="mypost-loading"><div class="rank-spinner"></div>불러오는 중...</div>
+          </div>
+        </div>
+        <div class="rank-sec">
+          <div class="rank-lbl">
+            <span>네이버 블로그 상위 포스팅</span>
+            <button class="rank-load-btn" id="btn-${rankId}" onclick="loadBlogPosts('${d.kw.replace(/'/g,"\\'")}','${rankId}')">불러오기</button>
+          </div>
+          <div class="rank-list" id="${rankId}">
+            <div class="rank-empty">위 버튼을 클릭하면 상위 포스팅 10개를 가져옵니다</div>
+          </div>
+        </div>
       </div>
     </div>`;
 }
 
 function fmt(n) {
-  if (n >= 10000) return (n/10000).toFixed(1) + '만';
+  if (n >= 10000) return (n/10000).toFixed(1)+'만';
   return n.toLocaleString('ko-KR');
 }
 
-function addRelated(kw) {
-  if (kws.includes(kw) || kws.length >= 5) return;
-  kws.push(kw);
-  renderChips();
-  log('ok', `연관 키워드 "${kw}" 추가됨`);
+// 연관 키워드 클릭 시 바로 검색
+function searchRelated(kw) {
+  document.getElementById('kwInp').value = kw;
+  kws = [kw];
+  log('busy', `"${kw}" 검색 중...`);
+  runScan();
+}
+
+// 뉴카 포스팅 로드
+async function loadMyPosts(kw, mypostId) {
+  const listEl = document.getElementById(mypostId);
+  if (!listEl) return;
+  try {
+    const res  = await fetch(`/api/myposts?query=${encodeURIComponent(kw)}`);
+    const json = await res.json();
+    const items = json.items || [];
+    if (items.length === 0) {
+      listEl.innerHTML = '<div class="mypost-empty">연관 포스팅이 없습니다</div>';
+      return;
+    }
+    listEl.innerHTML = items.map(item => `
+      <a class="mypost-item" href="${item.link}" target="_blank" rel="noopener">
+        <span class="mypost-icon">📝</span>
+        <div class="mypost-info">
+          <div class="mypost-title">${item.title.replace(/<[^>]+>/g,'')}</div>
+          <div class="mypost-desc">${(item.description||'').replace(/<[^>]+>/g,'').slice(0,60)}...</div>
+        </div>
+      </a>`).join('');
+  } catch(e) {
+    listEl.innerHTML = '<div class="mypost-empty">불러오기 실패</div>';
+  }
+}
+
+// 네이버 블로그 상위 포스팅 로드
+async function loadBlogPosts(kw, rankId) {
+  const listEl = document.getElementById(rankId);
+  const btnEl  = document.getElementById('btn-' + rankId);
+  if (!listEl) return;
+  btnEl.disabled = true;
+  btnEl.textContent = '로딩 중...';
+  listEl.innerHTML = '<div class="rank-loading"><div class="rank-spinner"></div>포스팅을 가져오는 중...</div>';
+  try {
+    const res  = await fetch(`/api/blog?query=${encodeURIComponent(kw)}&display=10`);
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || '오류');
+    const items = json.items || [];
+    if (items.length === 0) {
+      listEl.innerHTML = '<div class="rank-empty">검색 결과가 없습니다</div>';
+      return;
+    }
+    listEl.innerHTML = items.map((item, i) => `
+      <a class="rank-item" href="${item.link}" target="_blank" rel="noopener">
+        <span class="rank-num">${i+1}</span>
+        <div class="rank-info">
+          <div class="rank-title">${item.title.replace(/<[^>]+>/g,'')}</div>
+          <div class="rank-desc">${(item.description||'').replace(/<[^>]+>/g,'')}</div>
+          <div class="rank-blogger">✍️ ${item.bloggername||''}</div>
+        </div>
+      </a>`).join('');
+    btnEl.textContent = '새로고침';
+    btnEl.disabled = false;
+    log('ok', `"${kw}" 블로그 상위 포스팅 ${items.length}개 로드 완료`);
+  } catch(e) {
+    listEl.innerHTML = `<div class="rank-empty">불러오기 실패: ${e.message}</div>`;
+    btnEl.textContent = '다시 시도';
+    btnEl.disabled = false;
+  }
 }
 
 function showErr(html) {
@@ -1042,83 +477,6 @@ function showErr(html) {
 function log(type, msg) {
   document.getElementById('cdot').className = 'cdot' + (type ? ' '+type : '');
   document.getElementById('ctxt').textContent = msg;
-}
-
-// 뉴카 블로그 연관 포스팅 로드
-async function loadMyPosts(kw, mypostId) {
-  const listEl = document.getElementById(mypostId);
-  if (!listEl) return;
-
-  try {
-    const res  = await fetch(`/api/myposts?query=${encodeURIComponent(kw)}`);
-    const json = await res.json();
-    const items = json.items || [];
-
-    if (items.length === 0) {
-      listEl.innerHTML = '<div class="mypost-empty">연관 포스팅이 없습니다</div>';
-      return;
-    }
-
-    listEl.innerHTML = items.map(item => `
-      <a class="mypost-item" href="${item.link}" target="_blank" rel="noopener">
-        <span class="mypost-icon">📝</span>
-        <div class="mypost-info">
-          <div class="mypost-title">${item.title.replace(/<[^>]+>/g,'')}</div>
-          <div class="mypost-desc">${(item.description||'').replace(/<[^>]+>/g,'').slice(0,60)}...</div>
-        </div>
-      </a>`).join('');
-
-  } catch(e) {
-    listEl.innerHTML = '<div class="mypost-empty">불러오기 실패</div>';
-  }
-}
-
-// 블로그 포스팅 불러오기
-async function loadBlogPosts(kw, rankId) {
-  const listEl = document.getElementById(rankId);
-  const btnEl  = document.getElementById('btn-' + rankId);
-  if (!listEl) return;
-
-  btnEl.disabled = true;
-  btnEl.textContent = '로딩 중...';
-  listEl.innerHTML = '<div class="rank-loading"><div class="rank-spinner"></div>포스팅을 가져오는 중...</div>';
-
-  try {
-    const res  = await fetch(`/api/blog?query=${encodeURIComponent(kw)}&display=10`);
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || '오류');
-
-    const items = json.items || [];
-    if (items.length === 0) {
-      listEl.innerHTML = '<div class="rank-empty">검색 결과가 없습니다</div>';
-      return;
-    }
-
-    listEl.innerHTML = items.map((item, i) => {
-      const title   = item.title.replace(/<[^>]+>/g,'');
-      const desc    = item.description.replace(/<[^>]+>/g,'');
-      const blogger = item.bloggername || '';
-      return `
-        <a class="rank-item" href="${item.link}" target="_blank" rel="noopener">
-          <span class="rank-num">${i+1}</span>
-          <div class="rank-info">
-            <div class="rank-title">${title}</div>
-            <div class="rank-desc">${desc}</div>
-            <div class="rank-blogger">✍️ ${blogger}</div>
-          </div>
-        </a>`;
-    }).join('');
-
-    btnEl.textContent = '새로고침';
-    btnEl.disabled = false;
-    log('ok', `"${kw}" 블로그 상위 포스팅 ${items.length}개 로드 완료`);
-
-  } catch(e) {
-    listEl.innerHTML = `<div class="rank-empty">불러오기 실패: ${e.message}</div>`;
-    btnEl.textContent = '다시 시도';
-    btnEl.disabled = false;
-    log('fail', '블로그 포스팅 로드 실패: ' + e.message);
-  }
 }
 
 function exportCSV() {
