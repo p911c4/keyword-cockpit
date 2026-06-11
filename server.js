@@ -200,6 +200,87 @@ function proxyMyBlog(req, res) {
   });
 }
 
+// ── 네이버 DataLab 검색어 트렌드 API ────────────────────
+// POST /api/trend  body: { keyword: "키워드" }
+function proxyDataLab(req, res) {
+  let body = '';
+  req.on('data', chunk => body += chunk);
+  req.on('end', () => {
+    let params;
+    try { params = JSON.parse(body); }
+    catch(e) { return sendJSON(res, 400, { error: 'Invalid JSON' }); }
+
+    const { keyword } = params;
+    if (!keyword) return sendJSON(res, 400, { error: 'keyword 필드가 없습니다' });
+    if (!CLIENT_ID || !CLIENT_SECRET) {
+      return sendJSON(res, 500, { error: 'NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 환경변수를 설정하세요' });
+    }
+
+    // 최근 12개월 데이터 요청 (이번달 제외 — 데이터 없을 수 있음)
+    const endDate   = new Date();
+    endDate.setMonth(endDate.getMonth() - 1);  // 지난달까지
+    endDate.setDate(1);
+    const startDate = new Date(endDate);
+    startDate.setMonth(startDate.getMonth() - 11);
+
+    const fmt = d => d.toISOString().slice(0, 7) + '-01';
+
+    const payload = JSON.stringify({
+      startDate:  fmt(startDate),
+      endDate:    fmt(endDate),
+      timeUnit:   'month',
+      keywordGroups: [{
+        groupName: keyword,
+        keywords:  [keyword]
+      }],
+      device: '',
+      ages:   [],
+      gender: ''
+    });
+
+    const payloadBuf = Buffer.from(payload, 'utf8');
+
+    const options = {
+      hostname: 'openapi.naver.com',
+      path:     '/v1/datalab/search',
+      method:   'POST',
+      headers: {
+        'Content-Type':          'application/json; charset=utf-8',
+        'Content-Length':        payloadBuf.length,
+        'X-Naver-Client-Id':     CLIENT_ID,
+        'X-Naver-Client-Secret': CLIENT_SECRET,
+      }
+    };
+
+    const apiReq = https.request(options, apiRes => {
+      let data = '';
+      apiRes.on('data', chunk => data += chunk);
+      apiRes.on('end', () => {
+        console.log('  [DataLab] status:', apiRes.statusCode, '/ body:', data.slice(0,200));
+        if (!data || data.trim() === '') {
+          return sendJSON(res, 502, { error: 'DataLab API 빈 응답' });
+        }
+        try { JSON.parse(data); } catch(e) {
+          return sendJSON(res, 502, { error: 'DataLab 응답 파싱 오류: ' + data.slice(0,100) });
+        }
+        res.writeHead(apiRes.statusCode, {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+        });
+        res.end(data);
+      });
+    });
+
+    apiReq.on('error', err => {
+      console.error('  DataLab 오류:', err.message);
+      sendJSON(res, 502, { error: 'DataLab 연결 실패: ' + err.message });
+    });
+
+    apiReq.write(payloadBuf);
+    apiReq.end();
+  });
+}
+
 // ── 네이버 블로그 검색 API 프록시 ──────────────────────
 // /api/blog?query=키워드&display=10
 function proxyBlogSearch(req, res) {
@@ -343,6 +424,10 @@ const server = http.createServer((req, res) => {
 
   if (req.method === 'GET' && parsed.pathname === '/api/myposts') {
     return proxyMyBlog(req, res);
+  }
+
+  if (req.method === 'POST' && parsed.pathname === '/api/trend') {
+    return proxyDataLab(req, res);
   }
 
   serveStatic(req, res);
