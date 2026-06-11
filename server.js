@@ -194,7 +194,7 @@ function proxyMyBlog(req, res) {
     fetchAPI(() => {
       sendJSON(res, 200, {
         items: collected.slice(0, 3),
-        searchUrl: 'https://blog.naver.com/PostList.naver?blogId=p911c4&categoryNo=0&searchText=' + encodeURIComponent(query)
+        searchUrl: 'https://blog.naver.com/PostSearchList.naver?blogId=p911c4&searchText=' + encodeURIComponent(query)
       });
     });
   });

@@ -417,7 +417,7 @@ async function loadMyPosts(kw, mypostId) {
     const res  = await fetch(`/api/myposts?query=${encodeURIComponent(kw)}`);
     const json = await res.json();
     const items = json.items || [];
-    const moreUrl = json.searchUrl || `https://blog.naver.com/PostList.naver?blogId=p911c4&searchText=${encodeURIComponent(kw)}`;
+    const moreUrl = json.searchUrl || `https://blog.naver.com/PostSearchList.naver?blogId=p911c4&searchText=${encodeURIComponent(kw)}`;
 
     let html = '';
     if (items.length === 0) {
