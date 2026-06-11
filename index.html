@@ -114,14 +114,6 @@ body{background:var(--bg2);color:var(--text);font-family:'Noto Sans KR','Roboto'
 .sunit{font-size:10px;color:var(--text3);margin-top:4px}
 
 /* Bar */
-.barchart{margin-bottom:16px}
-.brow{display:flex;align-items:center;gap:10px;margin-bottom:7px}
-.bkey{font-size:11px;font-weight:600;color:var(--text3);width:22px;text-align:right;flex-shrink:0}
-.btrack{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
-.bfill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(0.16,1,0.3,1)}
-.bfill.pc{background:var(--blue)}
-.bfill.mo{background:#0099cc}
-.bval{font-size:11px;color:var(--text3);width:52px;text-align:right;flex-shrink:0;font-family:'Roboto',sans-serif}
 
 /* Related */
 .rel-sec{border-top:1px solid var(--border);padding-top:14px}
@@ -174,7 +166,7 @@ body{background:var(--bg2);color:var(--text);font-family:'Noto Sans KR','Roboto'
 .cdot.busy{background:#ffc107;animation:blink 0.5s infinite}
 .cdot.fail{background:#ff6060}
 
-/* ── 트렌드 그래프 ── */
+/* ── 트렌드 선 그래프 ── */
 .trend-sec {
   border-top: 1px solid var(--border);
   padding-top: 14px;
@@ -205,57 +197,18 @@ body{background:var(--bg2);color:var(--text);font-family:'Noto Sans KR','Roboto'
 .trend-down { background: var(--red-bg);   color: var(--red); }
 .trend-flat { background: var(--amber-bg); color: var(--amber); }
 
-.trend-chart {
+.trend-chart-wrap {
   position: relative;
-  height: 80px;
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  padding-bottom: 20px;
-}
-.trend-bar-wrap {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  height: 100%;
-  justify-content: flex-end;
-}
-.trend-bar {
   width: 100%;
-  border-radius: 3px 3px 0 0;
-  transition: height 0.8s cubic-bezier(0.16,1,0.3,1);
-  min-height: 2px;
-  position: relative;
-  cursor: pointer;
+  height: 120px;
 }
-.trend-bar:hover::after {
-  content: attr(data-val);
-  position: absolute;
-  top: -22px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--text);
-  color: #fff;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 3px;
-  white-space: nowrap;
-  z-index: 10;
-}
-.trend-bar.current { background: var(--blue); }
-.trend-bar.past    { background: var(--blue-light); border: 1px solid rgba(20,40,160,0.2); }
-.trend-month {
-  font-size: 9px;
-  color: var(--text3);
-  text-align: center;
-  position: absolute;
-  bottom: 0;
-  white-space: nowrap;
+.trend-chart-wrap svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 .trend-loading {
-  height: 80px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -266,10 +219,29 @@ body{background:var(--bg2);color:var(--text);font-family:'Noto Sans KR','Roboto'
 .trend-summary {
   font-size: 12px;
   color: var(--text2);
-  margin-top: 8px;
+  margin-top: 10px;
   line-height: 1.6;
 }
 .trend-summary b { color: var(--blue); }
+.trend-summary .up   { color: var(--green); font-weight: 700; }
+.trend-summary .down { color: var(--red);   font-weight: 700; }
+
+/* SVG 툴팁 */
+.trend-tooltip {
+  position: absolute;
+  background: var(--text);
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 20;
+  display: none;
+  transform: translate(-50%, -100%);
+  margin-top: -6px;
+  font-family: 'Roboto', monospace;
+}
 
 /* ── 최근 검색 ── */
 .recent-wrap {
@@ -644,7 +616,6 @@ function renderResults() {
     : '<div style="text-align:center;padding:32px;color:var(--text3);font-size:13px">검색 결과가 없습니다.<br>다른 키워드로 다시 시도해 보세요.</div>';
 
   setTimeout(() => {
-    document.querySelectorAll('.bfill[data-w]').forEach(el => el.style.width = el.dataset.w);
     main.forEach(d => {
       const mypostId = 'my-'   + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
       const rankId   = 'rank-' + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
@@ -685,24 +656,21 @@ function card(d, i, maxT, rel) {
         <div class="comp-pill ${cCls}">${cTxt}</div>
       </div>
       <div class="kwcard-body">
-        <div class="trend-sec">
-          <div class="trend-header">
-            <div class="trend-lbl">📈 검색 트렌드 (최근 12개월)</div>
-            <div class="trend-badge trend-flat" id="badge-${rankId}">분석 중...</div>
-          </div>
-          <div class="trend-chart" id="trend-${rankId}">
-            <div class="trend-loading"><div class="rank-spinner"></div>트렌드 데이터 로딩 중...</div>
-          </div>
-          <div class="trend-summary" id="trend-sum-${rankId}"></div>
-        </div>
         <div class="sgrid">
           <div class="scell"><div class="slbl">PC 월간</div><div class="snum pc">${fmt(d.pc)}</div><div class="sunit">PC ${pcPct}%</div></div>
           <div class="scell"><div class="slbl">모바일 월간</div><div class="snum mo">${fmt(d.mo)}</div><div class="sunit">모바일 ${100-pcPct}%</div></div>
           <div class="scell"><div class="slbl">합계</div><div class="snum tot">${fmt(tot)}</div><div class="sunit">월간 총합</div></div>
         </div>
-        <div class="barchart">
-          <div class="brow"><span class="bkey">PC</span><div class="btrack"><div class="bfill pc" data-w="${pcW}%" style="width:0"></div></div><span class="bval">${fmt(d.pc)}</span></div>
-          <div class="brow"><span class="bkey">MO</span><div class="btrack"><div class="bfill mo" data-w="${moW}%" style="width:0"></div></div><span class="bval">${fmt(d.mo)}</span></div>
+
+        <div class="trend-sec">
+          <div class="trend-header">
+            <div class="trend-lbl">📈 검색 트렌드 (최근 12개월)</div>
+            <div class="trend-badge trend-flat" id="badge-${rankId}">분석 중...</div>
+          </div>
+          <div class="trend-chart-wrap" id="trend-${rankId}">
+            <div class="trend-loading"><div class="rank-spinner"></div>트렌드 데이터 로딩 중...</div>
+          </div>
+          <div class="trend-summary" id="trend-sum-${rankId}"></div>
         </div>
         ${relHtml}
         <div class="mypost-sec">
@@ -822,12 +790,12 @@ function log(type, msg) {
   document.getElementById('ctxt').textContent = msg;
 }
 
-// 트렌드 그래프 로드
+// 트렌드 선 그래프 로드
 async function loadTrend(kw, rankId) {
-  const chartEl = document.getElementById('trend-' + rankId);
+  const wrapEl  = document.getElementById('trend-' + rankId);
   const badgeEl = document.getElementById('badge-' + rankId);
   const sumEl   = document.getElementById('trend-sum-' + rankId);
-  if (!chartEl) return;
+  if (!wrapEl) return;
 
   try {
     const res  = await fetch('/api/trend', {
@@ -840,50 +808,139 @@ async function loadTrend(kw, rankId) {
 
     const results = json.results?.[0]?.data || [];
     if (results.length === 0) {
-      chartEl.innerHTML = '<div class="trend-loading">데이터 없음</div>';
+      wrapEl.innerHTML = '<div class="trend-loading">데이터 없음</div>';
+      badgeEl.textContent = '데이터 없음';
       return;
     }
 
     const values = results.map(d => d.ratio);
+    const labels = results.map(d => d.period.slice(0,7));
     const maxVal = Math.max(...values, 1);
-    const recent3  = values.slice(-3);
-    const prev3    = values.slice(-6, -3);
-    const recentAvg = recent3.reduce((a,b) => a+b, 0) / recent3.length;
-    const prevAvg   = prev3.reduce((a,b)  => a+b, 0) / prev3.length;
-    const diff = ((recentAvg - prevAvg) / Math.max(prevAvg, 1)) * 100;
+    const minVal = Math.min(...values);
+
+    // 트렌드 방향 계산
+    const recent3 = values.slice(-3);
+    const prev3   = values.slice(-6, -3);
+    const rAvg = recent3.reduce((a,b)=>a+b,0)/recent3.length;
+    const pAvg = prev3.reduce((a,b)=>a+b,0)/Math.max(prev3.length,1);
+    const diff = ((rAvg - pAvg) / Math.max(pAvg, 1)) * 100;
 
     // 배지
     let badgeCls, badgeTxt;
-    if (diff > 10)       { badgeCls = 'trend-up';   badgeTxt = `📈 상승 +${diff.toFixed(0)}%`; }
-    else if (diff < -10) { badgeCls = 'trend-down';  badgeTxt = `📉 하락 ${diff.toFixed(0)}%`; }
-    else                 { badgeCls = 'trend-flat';  badgeTxt = `➡️ 보합 ${diff.toFixed(0)}%`; }
-    badgeEl.className = 'trend-badge ' + badgeCls;
+    if (diff > 10)       { badgeCls='trend-up';   badgeTxt=`📈 상승 +${diff.toFixed(0)}%`; }
+    else if (diff < -10) { badgeCls='trend-down';  badgeTxt=`📉 하락 ${diff.toFixed(0)}%`; }
+    else                 { badgeCls='trend-flat';  badgeTxt=`➡️ 보합 ${diff>=0?'+':''}${diff.toFixed(0)}%`; }
+    badgeEl.className   = 'trend-badge ' + badgeCls;
     badgeEl.textContent = badgeTxt;
 
-    // 차트
-    chartEl.innerHTML = results.map((d, i) => {
-      const h    = Math.max(Math.round((d.ratio / maxVal) * 56), 2);
-      const isLast = i === results.length - 1;
-      const mon  = d.period.slice(5, 7) + '월';
-      return `
-        <div class="trend-bar-wrap" style="position:relative">
-          <div class="trend-bar ${isLast ? 'current' : 'past'}"
-            style="height:${h}px"
-            data-val="${d.ratio}">
-          </div>
-          ${i % 3 === 0 || isLast ? `<span class="trend-month">${mon}</span>` : ''}
-        </div>`;
+    // SVG 선 그래프 생성
+    const W = 600, H = 90;
+    const padL = 8, padR = 8, padT = 16, padB = 28;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+    const n = values.length;
+
+    const xPos = i => padL + (i / (n-1)) * chartW;
+    const yPos = v => padT + chartH - ((v - minVal) / Math.max(maxVal - minVal, 1)) * chartH;
+
+    // 폴리라인 포인트
+    const pts = values.map((v,i) => `${xPos(i)},${yPos(v)}`).join(' ');
+
+    // 그라디언트 채우기 경로
+    const fillPath = `M${xPos(0)},${yPos(values[0])} ` +
+      values.map((v,i) => `L${xPos(i)},${yPos(v)}`).join(' ') +
+      ` L${xPos(n-1)},${H-padB} L${xPos(0)},${H-padB} Z`;
+
+    // X축 레이블 — 3개월마다 표시 + 마지막
+    const xLabels = labels.map((lbl, i) => {
+      if (i % 3 !== 0 && i !== n-1) return '';
+      const mon = lbl.slice(5,7) + '월';
+      return `<text x="${xPos(i)}" y="${H-padB+14}" text-anchor="middle"
+        font-size="9" fill="#999" font-family="Roboto,sans-serif">${mon}</text>`;
     }).join('');
 
+    // 데이터 포인트 원
+    const dots = values.map((v,i) => {
+      const isLast = i === n-1;
+      const isPeak = v === maxVal;
+      const r = isPeak ? 5 : isLast ? 5 : 3.5;
+      const fill = isPeak ? '#1428a0' : isLast ? '#1428a0' : '#fff';
+      const stroke = '#1428a0';
+      const sw = isPeak ? 2.5 : isLast ? 2.5 : 2;
+      return `<circle cx="${xPos(i)}" cy="${yPos(v)}" r="${r}"
+        fill="${fill}" stroke="${stroke}" stroke-width="${sw}"
+        style="cursor:pointer"
+        onmouseenter="showTrendTip(event,'${lbl(labels[i])}  ${v.toFixed(1)}')"
+        onmouseleave="hideTrendTip()"/>`;
+    }).join('');
+
+    // 최고점 라벨
+    const peakIdx = values.indexOf(maxVal);
+    const peakLabel = `<text x="${xPos(peakIdx)}" y="${yPos(maxVal)-10}"
+      text-anchor="middle" font-size="10" fill="#1428a0"
+      font-family="Roboto,sans-serif" font-weight="700">${maxVal.toFixed(1)}</text>`;
+
+    const svg = `
+      <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block">
+        <defs>
+          <linearGradient id="tg-${rankId}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#1428a0" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#1428a0" stop-opacity="0.01"/>
+          </linearGradient>
+        </defs>
+        <!-- 그리드 라인 -->
+        <line x1="${padL}" y1="${padT}" x2="${W-padR}" y2="${padT}"
+          stroke="#e5e5e5" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="${padL}" y1="${padT+chartH/2}" x2="${W-padR}" y2="${padT+chartH/2}"
+          stroke="#e5e5e5" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}"
+          stroke="#e0e0e0" stroke-width="1"/>
+        <!-- 채우기 -->
+        <path d="${fillPath}" fill="url(#tg-${rankId})"/>
+        <!-- 선 -->
+        <polyline points="${pts}"
+          fill="none" stroke="#1428a0" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- X축 레이블 -->
+        ${xLabels}
+        <!-- 데이터 포인트 -->
+        ${dots}
+        <!-- 최고점 라벨 -->
+        ${peakLabel}
+      </svg>
+      <div class="trend-tooltip" id="ttip-${rankId}"></div>`;
+
+    wrapEl.innerHTML = svg;
+    wrapEl.style.height = 'auto';
+
     // 요약
-    const peak = results.reduce((a,b) => a.ratio > b.ratio ? a : b);
-    const peakMon = peak.period.slice(0,7);
-    sumEl.innerHTML = `최고 검색량 <b>${peak.ratio.toFixed(1)}</b> (${peakMon}) · 전분기 대비 <b class="${diff>0?'':''}${diff>10?'trend-up':diff<-10?'trend-down':''}">${diff>0?'+':''}${diff.toFixed(0)}%</b>`;
+    const peak = results.reduce((a,b) => a.ratio>b.ratio ? a : b);
+    const diffCls = diff > 10 ? 'up' : diff < -10 ? 'down' : '';
+    const diffStr = (diff >= 0 ? '+' : '') + diff.toFixed(0) + '%';
+    sumEl.innerHTML = `최고: <b>${peak.ratio.toFixed(1)}</b> (${peak.period.slice(0,7)}) · 전분기 대비 <span class="${diffCls}"><b>${diffStr}</b></span>`;
 
   } catch(e) {
-    chartEl.innerHTML = `<div class="trend-loading" style="color:var(--red)">트렌드 로드 실패</div>`;
+    wrapEl.innerHTML = `<div class="trend-loading" style="color:var(--red)">트렌드 로드 실패: ${e.message}</div>`;
     console.error('trend error', e);
   }
+}
+
+function lbl(s) { return s.slice(0,7); }
+
+function showTrendTip(e, text) {
+  const el = e.target.closest('.trend-chart-wrap')?.querySelector('[id^="ttip-"]');
+  if (!el) return;
+  el.textContent = text;
+  el.style.display = 'block';
+  const rect = e.target.closest('.trend-chart-wrap').getBoundingClientRect();
+  const cx   = e.clientX - rect.left;
+  const cy   = e.clientY - rect.top;
+  el.style.left = cx + 'px';
+  el.style.top  = cy + 'px';
+}
+
+function hideTrendTip() {
+  document.querySelectorAll('[id^="ttip-"]').forEach(el => el.style.display='none');
 }
 
 function exportCSV() {
