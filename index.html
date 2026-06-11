@@ -133,7 +133,8 @@ body{background:var(--bg2);color:var(--text);font-family:'Noto Sans KR','Roboto'
 
 /* 뉴카 포스팅 박스 */
 .mypost-sec{border:1.5px solid rgba(20,40,160,0.2);background:var(--blue-pale);border-radius:8px;padding:14px 16px;margin-top:20px;margin-bottom:10px}
-.mypost-lbl{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:0.3px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.mypost-lbl{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:0.3px;margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mypost-lbl-sub{font-size:10px;font-weight:400;color:rgba(20,40,160,0.45);letter-spacing:0}
 .mypost-list{display:flex;flex-direction:column;gap:6px}
 .mypost-item{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;background:#fff;border:1px solid rgba(20,40,160,0.12);border-radius:6px;text-decoration:none;transition:all 0.15s}
 .mypost-item:hover{border-color:var(--blue);box-shadow:0 2px 8px rgba(20,40,160,0.1)}
@@ -172,6 +173,70 @@ body{background:var(--bg2);color:var(--text);font-family:'Noto Sans KR','Roboto'
 .cdot.ok{background:#4cff8f}
 .cdot.busy{background:#ffc107;animation:blink 0.5s infinite}
 .cdot.fail{background:#ff6060}
+
+/* ── 최근 검색 ── */
+.recent-wrap {
+  margin-top: 14px;
+  display: none;
+}
+.recent-wrap.show { display: block; }
+.recent-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: 0.3px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.recent-clear {
+  font-size: 11px;
+  color: var(--text3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: color 0.15s;
+}
+.recent-clear:hover { color: var(--red); }
+.recent-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.recent-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg2);
+  border: 1.5px solid var(--border2);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.recent-tag:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: var(--blue-pale);
+}
+.recent-tag .rtag-icon {
+  font-size: 11px;
+  opacity: 0.5;
+}
+.recent-tag .rtag-del {
+  font-size: 14px;
+  opacity: 0.35;
+  line-height: 1;
+  transition: opacity 0.15s;
+  margin-left: 2px;
+}
+.recent-tag .rtag-del:hover { opacity: 1; color: var(--red); }
 
 /* ── 태블릿 ── */
 @media(max-width:768px){
@@ -297,6 +362,13 @@ body{background:var(--bg2);color:var(--text);font-family:'Noto Sans KR','Roboto'
           autofocus />
         <button class="btn btn-primary" onclick="doSearch()">검색</button>
       </div>
+      <div class="recent-wrap" id="recentWrap">
+        <div class="recent-label">
+          <span>🕒 최근 검색</span>
+          <button class="recent-clear" onclick="clearRecent()">전체 삭제</button>
+        </div>
+        <div class="recent-list" id="recentList"></div>
+      </div>
     </div>
   </div>
 
@@ -340,12 +412,82 @@ setInterval(() => {
     t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
 }, 1000);
 
+// ── 최근 검색 기록 ──────────────────────────────────
+const MAX_RECENT = 5;
+
+function getRecent() {
+  try { return JSON.parse(localStorage.getItem('recentKw') || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveRecent(kw) {
+  let list = getRecent().filter(k => k !== kw); // 중복 제거
+  list.unshift(kw);                              // 맨 앞에 추가
+  list = list.slice(0, MAX_RECENT);              // 5개 제한
+  localStorage.setItem('recentKw', JSON.stringify(list));
+  renderRecent();
+}
+
+function clearRecent() {
+  localStorage.removeItem('recentKw');
+  renderRecent();
+}
+
+function deleteRecentOne(kw, e) {
+  e.stopPropagation();
+  const list = getRecent().filter(k => k !== kw);
+  localStorage.setItem('recentKw', JSON.stringify(list));
+  renderRecent();
+}
+function renderRecent() {
+  const list = getRecent();
+  const wrap = document.getElementById('recentWrap');
+  const el   = document.getElementById('recentList');
+  if (!wrap || !el) return;
+  if (list.length === 0) { wrap.classList.remove('show'); return; }
+  wrap.classList.add('show');
+  el.innerHTML = list.map(kw => {
+    const safe = kw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return `
+    <div class="recent-tag" onclick="searchFromRecent(this.dataset.kw)" data-kw="${safe}">
+      <span class="rtag-icon">🕒</span>
+      <span>${safe}</span>
+      <span class="rtag-del" onclick="deleteRecentThis(this, event)">×</span>
+    </div>`;
+  }).join('');
+}
+
+function searchFromRecent(kw) {
+  document.getElementById('kwInp').value = kw;
+  kws = [kw];
+  saveRecent(kw);
+  log('busy', '"' + kw + '" 검색 중...');
+  runScan();
+}
+
+function deleteRecentThis(el, e) {
+  e.stopPropagation();
+  const kw = el.closest('.recent-tag').dataset.kw;
+  const list = getRecent().filter(k => k !== kw);
+  localStorage.setItem('recentKw', JSON.stringify(list));
+  renderRecent();
+}
+
+// DOM 준비 후 초기 렌더링
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderRecent);
+} else {
+  renderRecent();
+}
+
+
 function doSearch() {
   const inp = document.getElementById('kwInp');
   const kw  = inp.value.trim().replace(/\s+/g, '');
   if (!kw) return;
   kws = [kw];
   inp.value = '';
+  saveRecent(kw);  // 최근 검색 저장
   log('busy', `"${kw}" 검색 중...`);
   runScan();
 }
@@ -455,7 +597,7 @@ function card(d, i, maxT, rel) {
         </div>
         ${relHtml}
         <div class="mypost-sec">
-          <div class="mypost-lbl">🔖 뉴카 포스팅</div>
+          <div class="mypost-lbl">🔖 뉴카 포스팅 <span class="mypost-lbl-sub">(RSS 최근 30개 + 검색 상위 100개 중)</span></div>
           <div class="mypost-list" id="${mypostId}">
             <div class="mypost-loading"><div class="rank-spinner"></div>불러오는 중...</div>
           </div>
