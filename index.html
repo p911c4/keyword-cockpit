@@ -144,6 +144,8 @@ body{background:var(--bg2);color:var(--text);font-family:'Noto Sans KR','Roboto'
 .mypost-item:hover .mypost-title{color:var(--blue)}
 .mypost-desc{font-size:11px;color:var(--text3);margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .mypost-empty{font-size:12px;color:var(--text3);padding:4px 0}
+.mypost-more{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;margin-top:4px;background:var(--blue);color:#fff;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;transition:all 0.15s}
+.mypost-more:hover{background:var(--blue2);box-shadow:0 2px 8px rgba(20,40,160,0.2)}
 .mypost-loading{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:6px}
 
 /* Rank / Blog posts */
@@ -415,18 +417,27 @@ async function loadMyPosts(kw, mypostId) {
     const res  = await fetch(`/api/myposts?query=${encodeURIComponent(kw)}`);
     const json = await res.json();
     const items = json.items || [];
+    const moreUrl = json.searchUrl || `https://blog.naver.com/PostList.naver?blogId=p911c4&searchText=${encodeURIComponent(kw)}`;
+
+    let html = '';
     if (items.length === 0) {
-      listEl.innerHTML = '<div class="mypost-empty">연관 포스팅이 없습니다</div>';
-      return;
+      html = '<div class="mypost-empty">앱에서 찾은 연관 포스팅이 없습니다. 아래 링크에서 직접 확인하세요.</div>';
+    } else {
+      html = items.map(item => `
+        <a class="mypost-item" href="${item.link}" target="_blank" rel="noopener">
+          <span class="mypost-icon">📝</span>
+          <div class="mypost-info">
+            <div class="mypost-title">${item.title.replace(/<[^>]+>/g,'')}</div>
+            <div class="mypost-desc">${(item.description||'').replace(/<[^>]+>/g,'').slice(0,60)}...</div>
+          </div>
+        </a>`).join('');
     }
-    listEl.innerHTML = items.map(item => `
-      <a class="mypost-item" href="${item.link}" target="_blank" rel="noopener">
-        <span class="mypost-icon">📝</span>
-        <div class="mypost-info">
-          <div class="mypost-title">${item.title.replace(/<[^>]+>/g,'')}</div>
-          <div class="mypost-desc">${(item.description||'').replace(/<[^>]+>/g,'').slice(0,60)}...</div>
-        </div>
-      </a>`).join('');
+    // "더 보기" 링크 항상 추가
+    html += `
+      <a class="mypost-more" href="${moreUrl}" target="_blank" rel="noopener">
+        🔍 뉴카 블로그에서 "${kw}" 전체 검색 →
+      </a>`;
+    listEl.innerHTML = html;
   } catch(e) {
     listEl.innerHTML = '<div class="mypost-empty">불러오기 실패</div>';
   }

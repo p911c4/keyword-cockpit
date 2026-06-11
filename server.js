@@ -105,59 +105,98 @@ function sendJSON(res, status, obj) {
   res.end(JSON.stringify(obj));
 }
 
-// ── 뉴카 블로그 내 검색 (Open API blogurl 파라미터) ──
+// ── 뉴카 블로그 포스팅 (RSS + Open API 조합) ──────────
 // /api/myposts?query=키워드
 function proxyMyBlog(req, res) {
-  const parsed  = url.parse(req.url, true);
-  const query   = parsed.query.query || '';
+  const parsed = url.parse(req.url, true);
+  const query  = parsed.query.query || '';
+  const qLower = query.toLowerCase();
 
   if (!CLIENT_ID || !CLIENT_SECRET) {
     return sendJSON(res, 500, { error: 'NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 환경변수를 설정하세요' });
   }
 
-  // display 100개 가져온 후 p911c4 필터링 (경쟁 키워드도 커버)
-  const apiPath = `/v1/search/blog.json?query=${encodeURIComponent(query)}&display=100&sort=sim`;
+  const collected = [];
+  const seenLinks = new Set();
 
-  const options = {
-    hostname: 'openapi.naver.com',
-    path:     apiPath,
-    method:   'GET',
-    headers: {
-      'X-Naver-Client-Id':     CLIENT_ID,
-      'X-Naver-Client-Secret': CLIENT_SECRET,
-    }
-  };
+  // 결과 합치기 헬퍼
+  function addItem(title, link, description) {
+    const cleanLink = (link || '').split('?')[0];
+    if (!cleanLink || seenLinks.has(cleanLink)) return;
+    seenLinks.add(cleanLink);
+    collected.push({ title, link, description });
+  }
 
-  httpsGet(options, null, 0, (err, statusCode, data) => {
-    if (err) {
-      console.error('  뉴카 블로그 검색 오류:', err.message);
-      return sendJSON(res, 502, { error: '뉴카 블로그 검색 실패: ' + err.message });
-    }
-    console.log(`  [MyBlog API] status: ${statusCode} / query: "${query}"`);
+  // ── 1단계: RSS에서 최근 글 검색 ──
+  function fetchRSS(cb) {
+    const options = {
+      hostname: 'rss.blog.naver.com',
+      path:     '/p911c4.xml',
+      method:   'GET',
+      headers:  { 'User-Agent': 'Mozilla/5.0' }
+    };
+    httpsGet(options, null, 0, (err, statusCode, data) => {
+      if (err || !data) { console.log('  [RSS] 실패'); return cb(); }
+      const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+      let match;
+      while ((match = itemRegex.exec(data)) !== null) {
+        const block = match[1];
+        const getTag = (tag) => {
+          const m = block.match(new RegExp('<' + tag + '[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/' + tag + '>|<' + tag + '[^>]*>([^<]*)<\\/' + tag + '>'));
+          return m ? (m[1] || m[2] || '').trim() : '';
+        };
+        const title = getTag('title');
+        const link  = getTag('link') || (block.match(/<link>(.*?)<\/link>/) || [])[1] || '';
+        const desc  = getTag('description');
+        const text  = (title + ' ' + desc).toLowerCase();
+        // 키워드 포함 여부 (공백 제거 비교)
+        if (title && text.replace(/\s/g,'').includes(qLower.replace(/\s/g,''))) {
+          addItem(title, link, desc);
+        }
+      }
+      console.log('  [RSS] 매칭: ' + collected.length + '개');
+      cb();
+    });
+  }
 
-    if (!data || data.trim() === '') {
-      return sendJSON(res, 200, { items: [] });
-    }
-    try {
-      const json = JSON.parse(data);
-      const all  = json.items || [];
+  // ── 2단계: Open API 검색 결과에서 p911c4 필터 ──
+  function fetchAPI(cb) {
+    const apiPath = '/v1/search/blog.json?query=' + encodeURIComponent(query) + '&display=100&sort=sim';
+    const options = {
+      hostname: 'openapi.naver.com',
+      path:     apiPath,
+      method:   'GET',
+      headers: {
+        'X-Naver-Client-Id':     CLIENT_ID,
+        'X-Naver-Client-Secret': CLIENT_SECRET,
+      }
+    };
+    httpsGet(options, null, 0, (err, statusCode, data) => {
+      if (err || !data) { console.log('  [API] 실패'); return cb(); }
+      try {
+        const json = JSON.parse(data);
+        (json.items || []).forEach(item => {
+          const link = (item.link || '').toLowerCase();
+          const blog = (item.bloggerlink || '').toLowerCase();
+          const name = (item.bloggername || '').toLowerCase();
+          if (link.includes('p911c4') || blog.includes('p911c4') || name === '뉴카') {
+            addItem(item.title, item.link, item.description);
+          }
+        });
+        console.log('  [API] 누적 후 총: ' + collected.length + '개');
+      } catch(e) {}
+      cb();
+    });
+  }
 
-      // link, bloggerlink, bloggername 모두 확인 (URL 형식이 여러 가지)
-      const mine = all.filter(item => {
-        const link        = (item.link        || '').toLowerCase();
-        const bloggerlink = (item.bloggerlink || '').toLowerCase();
-        const bloggername = (item.bloggername || '').toLowerCase();
-        return link.includes('p911c4')
-            || bloggerlink.includes('p911c4')
-            || bloggername === '뉴카'
-            || bloggername === 'p911c4';
-      }).slice(0, 3);
-
-      console.log(`  [MyBlog] 전체 ${all.length}개 중 뉴카 포스팅 ${mine.length}개 필터링`);
-      sendJSON(res, 200, { items: mine });
-    } catch(e) {
-      sendJSON(res, 200, { items: [] });
-    }
+  // 순차 실행 → 결과 반환
+  fetchRSS(() => {
+    fetchAPI(() => {
+      sendJSON(res, 200, {
+        items: collected.slice(0, 3),
+        searchUrl: 'https://blog.naver.com/PostList.naver?blogId=p911c4&categoryNo=0&searchText=' + encodeURIComponent(query)
+      });
+    });
   });
 }
 
