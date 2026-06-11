@@ -105,6 +105,55 @@ function sendJSON(res, status, obj) {
   res.end(JSON.stringify(obj));
 }
 
+// ── 뉴카 블로그 RSS 파싱 ─────────────────────────────
+// /api/myposts?query=키워드
+function proxyMyBlog(req, res) {
+  const parsed = url.parse(req.url, true);
+  const query  = (parsed.query.query || '').toLowerCase();
+
+  const options = {
+    hostname: 'rss.blog.naver.com',
+    path:     '/p911c4.xml',
+    method:   'GET',
+    headers:  { 'User-Agent': 'Mozilla/5.0' }
+  };
+
+  httpsGet(options, null, 0, (err, statusCode, data) => {
+    if (err) {
+      console.error('  RSS 오류:', err.message);
+      return sendJSON(res, 502, { error: 'RSS 로드 실패: ' + err.message });
+    }
+
+    // XML에서 item 파싱
+    const items = [];
+    const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+    let match;
+    while ((match = itemRegex.exec(data)) !== null) {
+      const block = match[1];
+      const getTag = (tag) => {
+        const m = block.match(new RegExp(`<${tag}[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/${tag}>|<${tag}[^>]*>([^<]*)<\/${tag}>`));
+        return m ? (m[1] || m[2] || '').trim() : '';
+      };
+      const title       = getTag('title');
+      const link        = getTag('link') || block.match(/<link>(.*?)<\/link>/)?.[1] || '';
+      const description = getTag('description');
+      const pubDate     = getTag('pubDate');
+
+      // 키워드 연관성 체크 (제목 또는 설명에 키워드 포함)
+      const keywords = query.split(/\s+/).filter(Boolean);
+      const text     = (title + ' ' + description).toLowerCase();
+      const matched  = keywords.some(kw => text.includes(kw));
+
+      if (matched && title) {
+        items.push({ title, link, description, pubDate });
+      }
+    }
+
+    console.log(`  [RSS] query: "${query}" / matched: ${items.length}`);
+    sendJSON(res, 200, { items: items.slice(0, 5) });
+  });
+}
+
 // ── 네이버 블로그 검색 API 프록시 ──────────────────────
 // /api/blog?query=키워드&display=10
 function proxyBlogSearch(req, res) {
@@ -244,6 +293,10 @@ const server = http.createServer((req, res) => {
 
   if (req.method === 'GET' && parsed.pathname === '/api/blog') {
     return proxyBlogSearch(req, res);
+  }
+
+  if (req.method === 'GET' && parsed.pathname === '/api/myposts') {
+    return proxyMyBlog(req, res);
   }
 
   serveStatic(req, res);

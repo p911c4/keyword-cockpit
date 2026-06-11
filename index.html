@@ -546,6 +546,53 @@ body {
   .kwcard-body { padding: 14px 16px; }
 }
 
+/* ── 뉴카 연관 포스팅 박스 ── */
+.mypost-sec {
+  border: 1.5px solid rgba(20,40,160,0.25);
+  background: var(--blue-pale);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.mypost-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--blue);
+  letter-spacing: 0.3px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mypost-list { display: flex; flex-direction: column; gap: 6px; }
+.mypost-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #fff;
+  border: 1px solid rgba(20,40,160,0.12);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.mypost-item:hover { border-color: var(--blue); box-shadow: 0 2px 8px rgba(20,40,160,0.1); }
+.mypost-icon { font-size: 14px; flex-shrink: 0; }
+.mypost-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mypost-item:hover .mypost-title { color: var(--blue); }
+.mypost-empty { font-size: 12px; color: var(--text3); padding: 4px 0; }
+.mypost-loading {
+  font-size: 12px; color: var(--text3);
+  display: flex; align-items: center; gap: 6px;
+}
+
 /* ── Rank / Blog posts ── */
 .rank-sec {
   border-top: 1px solid var(--border);
@@ -896,9 +943,16 @@ function card(d, i, maxT, rel) {
       </div>
     </div>` : '';
 
-  // 네이버 블로그 상위 포스팅 — 불러오기 버튼
+  // 뉴카 연관 포스팅 + 네이버 블로그 상위 포스팅
   const rankId   = 'rank-' + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
+  const mypostId = 'my-'   + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
   const rankHtml = `
+    <div class="mypost-sec">
+      <div class="mypost-lbl">🔖 뉴카 연관 포스팅</div>
+      <div class="mypost-list" id="${mypostId}">
+        <div class="mypost-loading"><div class="rank-spinner"></div>불러오는 중...</div>
+      </div>
+    </div>
     <div class="rank-sec">
       <div class="rank-lbl">
         <span>네이버 블로그 상위 포스팅</span>
@@ -908,6 +962,8 @@ function card(d, i, maxT, rel) {
         <div class="rank-empty">위 버튼을 클릭하면 상위 포스팅 10개를 가져옵니다</div>
       </div>
     </div>`;
+  // 카드 렌더 후 뉴카 포스팅 자동 로드
+  setTimeout(() => loadMyPosts('${d.kw.replace(/'/g,"\'")}', '${mypostId}'), 100);
 
   return `
     <div class="kwcard" style="animation-delay:${i*0.06}s">
@@ -972,6 +1028,32 @@ function showErr(html) {
 function log(type, msg) {
   document.getElementById('cdot').className = 'cdot' + (type ? ' '+type : '');
   document.getElementById('ctxt').textContent = msg;
+}
+
+// 뉴카 블로그 연관 포스팅 로드
+async function loadMyPosts(kw, mypostId) {
+  const listEl = document.getElementById(mypostId);
+  if (!listEl) return;
+
+  try {
+    const res  = await fetch(`/api/myposts?query=${encodeURIComponent(kw)}`);
+    const json = await res.json();
+    const items = json.items || [];
+
+    if (items.length === 0) {
+      listEl.innerHTML = '<div class="mypost-empty">연관 포스팅이 없습니다</div>';
+      return;
+    }
+
+    listEl.innerHTML = items.map(item => `
+      <a class="mypost-item" href="${item.link}" target="_blank" rel="noopener">
+        <span class="mypost-icon">✍️</span>
+        <span class="mypost-title">${item.title.replace(/<[^>]+>/g,'')}</span>
+      </a>`).join('');
+
+  } catch(e) {
+    listEl.innerHTML = '<div class="mypost-empty">불러오기 실패</div>';
+  }
 }
 
 // 블로그 포스팅 불러오기
