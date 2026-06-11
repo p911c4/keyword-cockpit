@@ -870,7 +870,7 @@ async function loadTrend(kw, rankId) {
       return `<circle cx="${xPos(i)}" cy="${yPos(v)}" r="${r}"
         fill="${fill}" stroke="${stroke}" stroke-width="${sw}"
         style="cursor:pointer"
-        onmouseenter="showTrendTip(event,'${lbl(labels[i])}  ${v.toFixed(1)}')"
+        onmouseenter="showTrendTip(event,'${lbl(labels[i])}  ${v.toFixed(1)}%')"
         onmouseleave="hideTrendTip()"/>`;
     }).join('');
 
@@ -878,7 +878,7 @@ async function loadTrend(kw, rankId) {
     const peakIdx = values.indexOf(maxVal);
     const peakLabel = `<text x="${xPos(peakIdx)}" y="${yPos(maxVal)-10}"
       text-anchor="middle" font-size="10" fill="#1428a0"
-      font-family="Roboto,sans-serif" font-weight="700">${maxVal.toFixed(1)}</text>`;
+      font-family="Roboto,sans-serif" font-weight="700">${maxVal.toFixed(1)}%</text>`;
 
     const svg = `
       <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block">
@@ -917,7 +917,7 @@ async function loadTrend(kw, rankId) {
     const peak = results.reduce((a,b) => a.ratio>b.ratio ? a : b);
     const diffCls = diff > 10 ? 'up' : diff < -10 ? 'down' : '';
     const diffStr = (diff >= 0 ? '+' : '') + diff.toFixed(0) + '%';
-    sumEl.innerHTML = `최고: <b>${peak.ratio.toFixed(1)}</b> (${peak.period.slice(0,7)}) · 전분기 대비 <span class="${diffCls}"><b>${diffStr}</b></span>`;
+    sumEl.innerHTML = `최고: <b>${peak.ratio.toFixed(1)}%</b> (${peak.period.slice(0,7)}) · 전분기 대비 <span class="${diffCls}"><b>${diffStr}</b></span>`;
 
   } catch(e) {
     wrapEl.innerHTML = `<div class="trend-loading" style="color:var(--red)">트렌드 로드 실패: ${e.message}</div>`;
