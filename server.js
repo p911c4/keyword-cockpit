@@ -115,8 +115,8 @@ function proxyMyBlog(req, res) {
     return sendJSON(res, 500, { error: 'NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 환경변수를 설정하세요' });
   }
 
-  // display를 30개 가져온 후 p911c4 블로그 것만 필터링
-  const apiPath = `/v1/search/blog.json?query=${encodeURIComponent(query)}&display=30&sort=sim`;
+  // display 100개 가져온 후 p911c4 필터링 (경쟁 키워드도 커버)
+  const apiPath = `/v1/search/blog.json?query=${encodeURIComponent(query)}&display=100&sort=sim`;
 
   const options = {
     hostname: 'openapi.naver.com',
@@ -142,11 +142,15 @@ function proxyMyBlog(req, res) {
       const json = JSON.parse(data);
       const all  = json.items || [];
 
-      // bloggerlink 또는 link에 p911c4 포함된 것만 필터링
+      // link, bloggerlink, bloggername 모두 확인 (URL 형식이 여러 가지)
       const mine = all.filter(item => {
-        const link       = (item.link || '').toLowerCase();
+        const link        = (item.link        || '').toLowerCase();
         const bloggerlink = (item.bloggerlink || '').toLowerCase();
-        return link.includes('p911c4') || bloggerlink.includes('p911c4');
+        const bloggername = (item.bloggername || '').toLowerCase();
+        return link.includes('p911c4')
+            || bloggerlink.includes('p911c4')
+            || bloggername === '뉴카'
+            || bloggername === 'p911c4';
       }).slice(0, 3);
 
       console.log(`  [MyBlog] 전체 ${all.length}개 중 뉴카 포스팅 ${mine.length}개 필터링`);
