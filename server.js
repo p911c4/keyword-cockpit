@@ -116,7 +116,7 @@ function proxyMyBlog(req, res) {
   }
 
   // blogurl 파라미터로 특정 블로그 내에서만 검색
-  const apiPath = `/v1/search/blog.json?query=${encodeURIComponent(query)}&display=5&sort=sim&blogurl=blog.naver.com/p911c4`;
+  const apiPath = `/v1/search/blog.json?query=${encodeURIComponent(query)}&display=3&sort=sim&blogurl=blog.naver.com/p911c4`;
 
   const options = {
     hostname: 'openapi.naver.com',
