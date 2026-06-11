@@ -115,8 +115,8 @@ function proxyMyBlog(req, res) {
     return sendJSON(res, 500, { error: 'NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 환경변수를 설정하세요' });
   }
 
-  // blogurl 파라미터로 특정 블로그 내에서만 검색
-  const apiPath = `/v1/search/blog.json?query=${encodeURIComponent(query)}&display=3&sort=sim&blogurl=blog.naver.com/p911c4`;
+  // display를 30개 가져온 후 p911c4 블로그 것만 필터링
+  const apiPath = `/v1/search/blog.json?query=${encodeURIComponent(query)}&display=30&sort=sim`;
 
   const options = {
     hostname: 'openapi.naver.com',
@@ -140,7 +140,17 @@ function proxyMyBlog(req, res) {
     }
     try {
       const json = JSON.parse(data);
-      sendJSON(res, 200, { items: json.items || [] });
+      const all  = json.items || [];
+
+      // bloggerlink 또는 link에 p911c4 포함된 것만 필터링
+      const mine = all.filter(item => {
+        const link       = (item.link || '').toLowerCase();
+        const bloggerlink = (item.bloggerlink || '').toLowerCase();
+        return link.includes('p911c4') || bloggerlink.includes('p911c4');
+      }).slice(0, 3);
+
+      console.log(`  [MyBlog] 전체 ${all.length}개 중 뉴카 포스팅 ${mine.length}개 필터링`);
+      sendJSON(res, 200, { items: mine });
     } catch(e) {
       sendJSON(res, 200, { items: [] });
     }
