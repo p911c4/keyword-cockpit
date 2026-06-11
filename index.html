@@ -105,7 +105,6 @@ body{background:var(--bg2);color:var(--text);font-family:'Noto Sans KR','Roboto'
 
 /* Stat grid */
 .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
-@media(max-width:480px){.sgrid{grid-template-columns:1fr 1fr}}
 .scell{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 12px;text-align:center}
 .slbl{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px}
 .snum{font-size:26px;font-weight:700;letter-spacing:-1px;line-height:1;font-family:'Roboto',sans-serif}
@@ -174,7 +173,83 @@ body{background:var(--bg2);color:var(--text);font-family:'Noto Sans KR','Roboto'
 .cdot.busy{background:#ffc107;animation:blink 0.5s infinite}
 .cdot.fail{background:#ff6060}
 
-@media(max-width:600px){.topbar-name{font-size:14px}.hero{padding:20px 16px}.card-body{padding:16px}.kwcard-head{padding:12px 16px}.kwcard-body{padding:14px 16px}}
+/* ── 태블릿 ── */
+@media(max-width:768px){
+  .page{padding:20px 12px 80px}
+  .hero{padding:22px 18px}
+  .sgrid{grid-template-columns:repeat(3,1fr)}
+}
+
+/* ── 모바일 ── */
+@media(max-width:600px){
+  html{font-size:16px}
+  .topbar{padding:0 16px;height:52px}
+  .topbar-name{font-size:14px}
+  .topbar-logo{width:26px;height:26px;font-size:13px}
+  .topbar-status{font-size:11px}
+  .page{padding:16px 12px 70px}
+
+  /* Hero */
+  .hero{padding:20px 16px 18px;margin-bottom:12px}
+  .hero-eyebrow{font-size:10px;letter-spacing:1.5px}
+  .hero-title{font-size:21px}
+  .hero-sub{font-size:12px}
+
+  /* Card */
+  .card-header{padding:12px 16px}
+  .card-title{font-size:13px}
+  .card-body{padding:16px}
+
+  /* 입력 — 모바일에서 세로 배치 */
+  .kw-row{flex-direction:column;gap:10px}
+  .kw-row .btn{width:100%;padding:13px}
+  .input{padding:13px 14px;font-size:16px}
+
+  /* 결과 헤더 — 줄바꿈 */
+  .results-topbar{width:100%}
+  .results-meta{font-size:11px;width:100%}
+  .exp-row{width:100%}
+  .exp-row .btn{flex:1}
+
+  /* KW 카드 */
+  .kwcard-head{padding:12px 14px}
+  .kwname{font-size:17px}
+  .kwcard-body{padding:14px}
+
+  /* 통계 — 모바일에서 한 줄에 3개 유지하되 작게 */
+  .sgrid{grid-template-columns:repeat(3,1fr);gap:7px}
+  .scell{padding:11px 6px}
+  .slbl{font-size:9px;letter-spacing:0.3px}
+  .snum{font-size:19px}
+  .sunit{font-size:9px}
+
+  /* 연관 키워드 */
+  .rel-lbl{font-size:11px}
+  .rtag{font-size:12px;padding:6px 12px}
+
+  /* 뉴카 포스팅 */
+  .mypost-sec{padding:12px 12px}
+  .mypost-title{font-size:13px}
+  .mypost-desc{font-size:11px}
+  .mypost-more{padding:12px;font-size:12px}
+
+  /* 블로그 상위 포스팅 */
+  .rank-item{padding:10px}
+  .rank-title{font-size:13px}
+  .rank-desc{font-size:11px}
+  .rank-num{width:22px;height:22px;font-size:11px}
+
+  /* 콘솔바 */
+  .console{padding:9px 14px;font-size:11px}
+}
+
+/* ── 작은 모바일 (375px 이하) ── */
+@media(max-width:380px){
+  .hero-title{font-size:19px}
+  .sgrid{grid-template-columns:1fr 1fr;gap:8px}
+  .snum{font-size:22px}
+  .topbar-status span:nth-child(3),.topbar-status{gap:4px}
+}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
