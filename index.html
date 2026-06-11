@@ -546,6 +546,55 @@ body {
   .kwcard-body { padding: 14px 16px; }
 }
 
+/* ── Rank buttons ── */
+.rank-sec {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  margin-top: 14px;
+}
+.rank-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.rank-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+.rank-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 36px;
+  background: var(--blue-pale);
+  border: 1.5px solid rgba(20,40,160,0.15);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.rank-btn:hover {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.rank-btn:hover .rank-num { color: #fff; }
+.rank-num {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--blue);
+  font-family: 'Roboto', sans-serif;
+}
+.rank-note {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 4px;
+}
+
 /* ── Animations ── */
 @keyframes fadeUp  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 @keyframes chipIn  { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
@@ -783,6 +832,19 @@ function card(d, i, maxT, rel) {
       </div>
     </div>` : '';
 
+  // 네이버 블로그 상위 포스팅 순위 링크
+  const rankHtml = `
+    <div class="rank-sec">
+      <div class="rank-lbl">네이버 블로그 상위 포스팅 바로가기</div>
+      <div class="rank-list">
+        ${Array.from({length:10},(_,idx)=>`
+          <a class="rank-btn" href="https://search.naver.com/search.naver?where=blog&query=${encodeURIComponent(d.kw)}&start=${idx+1}" target="_blank" rel="noopener">
+            <span class="rank-num">${idx+1}위</span>
+          </a>`).join('')}
+      </div>
+      <div class="rank-note">※ 클릭하면 해당 순위 근처 포스팅으로 이동합니다</div>
+    </div>`;
+
   return `
     <div class="kwcard" style="animation-delay:${i*0.06}s">
       <div class="kwcard-head">
@@ -820,6 +882,7 @@ function card(d, i, maxT, rel) {
           </div>
         </div>
         ${relHtml}
+        ${rankHtml}
       </div>
     </div>`;
 }
