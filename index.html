@@ -548,10 +548,11 @@ body {
 
 /* ── 뉴카 연관 포스팅 박스 ── */
 .mypost-sec {
-  border: 1.5px solid rgba(20,40,160,0.25);
+  border: 1.5px solid rgba(20,40,160,0.2);
   background: var(--blue-pale);
   border-radius: 8px;
-  padding: 12px 14px;
+  padding: 14px 16px;
+  margin-top: 20px;
   margin-bottom: 10px;
 }
 .mypost-lbl {
@@ -587,6 +588,15 @@ body {
   text-overflow: ellipsis;
 }
 .mypost-item:hover .mypost-title { color: var(--blue); }
+.mypost-info { flex: 1; min-width: 0; }
+.mypost-desc {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 2px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 .mypost-empty { font-size: 12px; color: var(--text3); padding: 4px 0; }
 .mypost-loading {
   font-size: 12px; color: var(--text3);
@@ -953,7 +963,7 @@ function card(d, i, maxT, rel) {
   const mypostId = 'my-'   + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
   const rankHtml = `
     <div class="mypost-sec">
-      <div class="mypost-lbl">🔖 뉴카 연관 포스팅</div>
+      <div class="mypost-lbl">🔖 뉴카 포스팅</div>
       <div class="mypost-list" id="${mypostId}">
         <div class="mypost-loading"><div class="rank-spinner"></div>불러오는 중...</div>
       </div>
@@ -1051,8 +1061,11 @@ async function loadMyPosts(kw, mypostId) {
 
     listEl.innerHTML = items.map(item => `
       <a class="mypost-item" href="${item.link}" target="_blank" rel="noopener">
-        <span class="mypost-icon">✍️</span>
-        <span class="mypost-title">${item.title.replace(/<[^>]+>/g,'')}</span>
+        <span class="mypost-icon">📝</span>
+        <div class="mypost-info">
+          <div class="mypost-title">${item.title.replace(/<[^>]+>/g,'')}</div>
+          <div class="mypost-desc">${(item.description||'').replace(/<[^>]+>/g,'').slice(0,60)}...</div>
+        </div>
       </a>`).join('');
 
   } catch(e) {

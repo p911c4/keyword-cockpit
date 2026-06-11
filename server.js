@@ -105,52 +105,45 @@ function sendJSON(res, status, obj) {
   res.end(JSON.stringify(obj));
 }
 
-// ── 뉴카 블로그 RSS 파싱 ─────────────────────────────
+// ── 뉴카 블로그 내 검색 (Open API blogurl 파라미터) ──
 // /api/myposts?query=키워드
 function proxyMyBlog(req, res) {
-  const parsed = url.parse(req.url, true);
-  const query  = (parsed.query.query || '').toLowerCase();
+  const parsed  = url.parse(req.url, true);
+  const query   = parsed.query.query || '';
+
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    return sendJSON(res, 500, { error: 'NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 환경변수를 설정하세요' });
+  }
+
+  // blogurl 파라미터로 특정 블로그 내에서만 검색
+  const apiPath = `/v1/search/blog.json?query=${encodeURIComponent(query)}&display=5&sort=sim&blogurl=blog.naver.com/p911c4`;
 
   const options = {
-    hostname: 'rss.blog.naver.com',
-    path:     '/p911c4.xml',
+    hostname: 'openapi.naver.com',
+    path:     apiPath,
     method:   'GET',
-    headers:  { 'User-Agent': 'Mozilla/5.0' }
+    headers: {
+      'X-Naver-Client-Id':     CLIENT_ID,
+      'X-Naver-Client-Secret': CLIENT_SECRET,
+    }
   };
 
   httpsGet(options, null, 0, (err, statusCode, data) => {
     if (err) {
-      console.error('  RSS 오류:', err.message);
-      return sendJSON(res, 502, { error: 'RSS 로드 실패: ' + err.message });
+      console.error('  뉴카 블로그 검색 오류:', err.message);
+      return sendJSON(res, 502, { error: '뉴카 블로그 검색 실패: ' + err.message });
     }
+    console.log(`  [MyBlog API] status: ${statusCode} / query: "${query}"`);
 
-    // XML에서 item 파싱
-    const items = [];
-    const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-    let match;
-    while ((match = itemRegex.exec(data)) !== null) {
-      const block = match[1];
-      const getTag = (tag) => {
-        const m = block.match(new RegExp(`<${tag}[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/${tag}>|<${tag}[^>]*>([^<]*)<\/${tag}>`));
-        return m ? (m[1] || m[2] || '').trim() : '';
-      };
-      const title       = getTag('title');
-      const link        = getTag('link') || block.match(/<link>(.*?)<\/link>/)?.[1] || '';
-      const description = getTag('description');
-      const pubDate     = getTag('pubDate');
-
-      // 키워드 연관성 체크 (제목 또는 설명에 키워드 포함)
-      const keywords = query.split(/\s+/).filter(Boolean);
-      const text     = (title + ' ' + description).toLowerCase();
-      const matched  = keywords.some(kw => text.includes(kw));
-
-      if (matched && title) {
-        items.push({ title, link, description, pubDate });
-      }
+    if (!data || data.trim() === '') {
+      return sendJSON(res, 200, { items: [] });
     }
-
-    console.log(`  [RSS] query: "${query}" / matched: ${items.length}`);
-    sendJSON(res, 200, { items: items.slice(0, 5) });
+    try {
+      const json = JSON.parse(data);
+      sendJSON(res, 200, { items: json.items || [] });
+    } catch(e) {
+      sendJSON(res, 200, { items: [] });
+    }
   });
 }
 
