@@ -739,7 +739,7 @@ body {
   <!-- Hero -->
   <div class="hero">
     <div class="hero-eyebrow">Naver Search Advertising API</div>
-    <div class="hero-title">네이버 키워드 검색량 분석</div>
+    <div class="hero-title">네이버 키워드 검색량 분석 v1.2</div>
     <div class="hero-sub">키워드를 입력하면 월간 PC·모바일 검색량과 연관 키워드를 즉시 조회합니다.</div>
   </div>
 
@@ -918,6 +918,11 @@ function renderResults() {
 
   setTimeout(() => {
     document.querySelectorAll('.bfill[data-w]').forEach(el => el.style.width = el.dataset.w);
+    // 뉴카 연관 포스팅 자동 로드
+    main.forEach(d => {
+      const mypostId = 'my-' + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
+      loadMyPosts(d.kw, mypostId);
+    });
   }, 60);
 }
 
@@ -962,8 +967,7 @@ function card(d, i, maxT, rel) {
         <div class="rank-empty">위 버튼을 클릭하면 상위 포스팅 10개를 가져옵니다</div>
       </div>
     </div>`;
-  // 카드 렌더 후 뉴카 포스팅 자동 로드
-  setTimeout(() => loadMyPosts('${d.kw.replace(/'/g,"\'")}', '${mypostId}'), 100);
+
 
   return `
     <div class="kwcard" style="animation-delay:${i*0.06}s">
