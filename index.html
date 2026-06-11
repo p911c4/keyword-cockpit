@@ -546,7 +546,7 @@ body {
   .kwcard-body { padding: 14px 16px; }
 }
 
-/* ── Rank buttons ── */
+/* ── Rank / Blog posts ── */
 .rank-sec {
   border-top: 1px solid var(--border);
   padding-top: 14px;
@@ -559,40 +559,104 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 10px;
-}
-.rank-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-bottom: 8px;
-}
-.rank-btn {
-  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 36px;
+  justify-content: space-between;
+}
+.rank-load-btn {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blue);
   background: var(--blue-pale);
-  border: 1.5px solid rgba(20,40,160,0.15);
+  border: 1px solid rgba(20,40,160,0.2);
+  border-radius: 4px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.rank-load-btn:hover { background: var(--blue); color: #fff; }
+.rank-load-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.rank-list { display: flex; flex-direction: column; gap: 6px; }
+
+.rank-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
   border-radius: 6px;
   text-decoration: none;
   transition: all 0.15s;
 }
-.rank-btn:hover {
-  background: var(--blue);
-  border-color: var(--blue);
-}
-.rank-btn:hover .rank-num { color: #fff; }
+.rank-item:hover { border-color: var(--blue); background: var(--blue-pale); }
+
 .rank-num {
   font-size: 12px;
   font-weight: 700;
-  color: var(--blue);
+  color: #fff;
+  background: var(--blue);
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   font-family: 'Roboto', sans-serif;
 }
-.rank-note {
+
+.rank-info { flex: 1; min-width: 0; }
+.rank-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 3px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.rank-item:hover .rank-title { color: var(--blue); }
+.rank-desc {
   font-size: 11px;
   color: var(--text3);
-  margin-top: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.rank-blogger {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+
+.rank-empty {
+  font-size: 12px;
+  color: var(--text3);
+  padding: 12px;
+  text-align: center;
+}
+.rank-loading {
+  font-size: 12px;
+  color: var(--text3);
+  padding: 12px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.rank-spinner {
+  width: 14px; height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
 }
 
 /* ── Animations ── */
@@ -832,17 +896,17 @@ function card(d, i, maxT, rel) {
       </div>
     </div>` : '';
 
-  // 네이버 블로그 상위 포스팅 순위 링크
+  // 네이버 블로그 상위 포스팅 — 불러오기 버튼
+  const rankId   = 'rank-' + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
   const rankHtml = `
     <div class="rank-sec">
-      <div class="rank-lbl">네이버 블로그 상위 포스팅 바로가기</div>
-      <div class="rank-list">
-        ${Array.from({length:10},(_,idx)=>`
-          <a class="rank-btn" href="https://search.naver.com/search.naver?where=blog&query=${encodeURIComponent(d.kw)}&start=${idx+1}" target="_blank" rel="noopener">
-            <span class="rank-num">${idx+1}위</span>
-          </a>`).join('')}
+      <div class="rank-lbl">
+        <span>네이버 블로그 상위 포스팅</span>
+        <button class="rank-load-btn" id="btn-${rankId}" onclick="loadBlogPosts('${d.kw.replace(/'/g,"\'")}','${rankId}')">불러오기</button>
       </div>
-      <div class="rank-note">※ 클릭하면 해당 순위 근처 포스팅으로 이동합니다</div>
+      <div class="rank-list" id="${rankId}">
+        <div class="rank-empty">위 버튼을 클릭하면 상위 포스팅 10개를 가져옵니다</div>
+      </div>
     </div>`;
 
   return `
@@ -908,6 +972,54 @@ function showErr(html) {
 function log(type, msg) {
   document.getElementById('cdot').className = 'cdot' + (type ? ' '+type : '');
   document.getElementById('ctxt').textContent = msg;
+}
+
+// 블로그 포스팅 불러오기
+async function loadBlogPosts(kw, rankId) {
+  const listEl = document.getElementById(rankId);
+  const btnEl  = document.getElementById('btn-' + rankId);
+  if (!listEl) return;
+
+  btnEl.disabled = true;
+  btnEl.textContent = '로딩 중...';
+  listEl.innerHTML = '<div class="rank-loading"><div class="rank-spinner"></div>포스팅을 가져오는 중...</div>';
+
+  try {
+    const res  = await fetch(`/api/blog?query=${encodeURIComponent(kw)}&display=10`);
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || '오류');
+
+    const items = json.items || [];
+    if (items.length === 0) {
+      listEl.innerHTML = '<div class="rank-empty">검색 결과가 없습니다</div>';
+      return;
+    }
+
+    listEl.innerHTML = items.map((item, i) => {
+      const title   = item.title.replace(/<[^>]+>/g,'');
+      const desc    = item.description.replace(/<[^>]+>/g,'');
+      const blogger = item.bloggername || '';
+      return `
+        <a class="rank-item" href="${item.link}" target="_blank" rel="noopener">
+          <span class="rank-num">${i+1}</span>
+          <div class="rank-info">
+            <div class="rank-title">${title}</div>
+            <div class="rank-desc">${desc}</div>
+            <div class="rank-blogger">✍️ ${blogger}</div>
+          </div>
+        </a>`;
+    }).join('');
+
+    btnEl.textContent = '새로고침';
+    btnEl.disabled = false;
+    log('ok', `"${kw}" 블로그 상위 포스팅 ${items.length}개 로드 완료`);
+
+  } catch(e) {
+    listEl.innerHTML = `<div class="rank-empty">불러오기 실패: ${e.message}</div>`;
+    btnEl.textContent = '다시 시도';
+    btnEl.disabled = false;
+    log('fail', '블로그 포스팅 로드 실패: ' + e.message);
+  }
 }
 
 function exportCSV() {

@@ -38,10 +38,12 @@ if (fs.existsSync(path.join(__dirname, '.env'))) {
   console.log('  [Railway 모드] 환경변수 사용');
 }
 
-const PORT        = parseInt(process.env.PORT) || 3000;
-const CUSTOMER_ID = process.env.NAVER_CUSTOMER_ID;
-const API_KEY     = process.env.NAVER_API_KEY;
-const SECRET_KEY  = process.env.NAVER_SECRET_KEY;
+const PORT          = parseInt(process.env.PORT) || 3000;
+const CUSTOMER_ID   = process.env.NAVER_CUSTOMER_ID;
+const API_KEY       = process.env.NAVER_API_KEY;
+const SECRET_KEY    = process.env.NAVER_SECRET_KEY;
+const CLIENT_ID     = process.env.NAVER_CLIENT_ID;
+const CLIENT_SECRET = process.env.NAVER_CLIENT_SECRET;
 
 // 키 유효성 확인
 if (!CUSTOMER_ID || !API_KEY || !SECRET_KEY ||
@@ -101,6 +103,50 @@ function sendJSON(res, status, obj) {
     'Access-Control-Allow-Origin': 'http://localhost:' + PORT,
   });
   res.end(JSON.stringify(obj));
+}
+
+// ── 네이버 블로그 검색 API 프록시 ──────────────────────
+// /api/blog?query=키워드&display=10
+function proxyBlogSearch(req, res) {
+  const parsed = url.parse(req.url, true);
+  const query   = parsed.query.query || '';
+  const display = parseInt(parsed.query.display) || 10;
+
+  if (!query) return sendJSON(res, 400, { error: 'query 파라미터가 없습니다' });
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    return sendJSON(res, 500, { error: 'NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 환경변수를 설정하세요' });
+  }
+
+  const apiPath = `/v1/search/blog.json?query=${encodeURIComponent(query)}&display=${display}&sort=sim`;
+
+  const options = {
+    hostname: 'openapi.naver.com',
+    path:     apiPath,
+    method:   'GET',
+    headers: {
+      'X-Naver-Client-Id':     CLIENT_ID,
+      'X-Naver-Client-Secret': CLIENT_SECRET,
+    }
+  };
+
+  httpsGet(options, null, 0, (err, statusCode, data) => {
+    if (err) {
+      console.error('  블로그 API 오류:', err.message);
+      return sendJSON(res, 502, { error: '블로그 검색 API 연결 실패: ' + err.message });
+    }
+    console.log('  [Blog API] status:', statusCode, '/ query:', query);
+    if (!data || data.trim() === '') {
+      return sendJSON(res, 502, { error: '블로그 API 빈 응답' });
+    }
+    try { JSON.parse(data); } catch(e) {
+      return sendJSON(res, 502, { error: '블로그 API 응답 파싱 오류: ' + data.slice(0,100) });
+    }
+    res.writeHead(statusCode, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Access-Control-Allow-Origin': '*',
+    });
+    res.end(data);
+  });
 }
 
 // ── Naver API 프록시 ──────────────────────────────────
@@ -194,6 +240,10 @@ const server = http.createServer((req, res) => {
 
   if (req.method === 'POST' && parsed.pathname === '/api/keyword') {
     return proxyNaverAPI(req, res);
+  }
+
+  if (req.method === 'GET' && parsed.pathname === '/api/blog') {
+    return proxyBlogSearch(req, res);
   }
 
   serveStatic(req, res);
