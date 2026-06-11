@@ -174,6 +174,103 @@ body{background:var(--bg2);color:var(--text);font-family:'Noto Sans KR','Roboto'
 .cdot.busy{background:#ffc107;animation:blink 0.5s infinite}
 .cdot.fail{background:#ff6060}
 
+/* ── 트렌드 그래프 ── */
+.trend-sec {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  margin-bottom: 16px;
+}
+.trend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.trend-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.trend-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.trend-up   { background: var(--green-bg); color: var(--green); }
+.trend-down { background: var(--red-bg);   color: var(--red); }
+.trend-flat { background: var(--amber-bg); color: var(--amber); }
+
+.trend-chart {
+  position: relative;
+  height: 80px;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  padding-bottom: 20px;
+}
+.trend-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.trend-bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.8s cubic-bezier(0.16,1,0.3,1);
+  min-height: 2px;
+  position: relative;
+  cursor: pointer;
+}
+.trend-bar:hover::after {
+  content: attr(data-val);
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  z-index: 10;
+}
+.trend-bar.current { background: var(--blue); }
+.trend-bar.past    { background: var(--blue-light); border: 1px solid rgba(20,40,160,0.2); }
+.trend-month {
+  font-size: 9px;
+  color: var(--text3);
+  text-align: center;
+  position: absolute;
+  bottom: 0;
+  white-space: nowrap;
+}
+.trend-loading {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text3);
+}
+.trend-summary {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 8px;
+  line-height: 1.6;
+}
+.trend-summary b { color: var(--blue); }
+
 /* ── 최근 검색 ── */
 .recent-wrap {
   margin-top: 14px;
@@ -549,8 +646,10 @@ function renderResults() {
   setTimeout(() => {
     document.querySelectorAll('.bfill[data-w]').forEach(el => el.style.width = el.dataset.w);
     main.forEach(d => {
-      const mypostId = 'my-' + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
+      const mypostId = 'my-'   + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
+      const rankId   = 'rank-' + d.kw.replace(/[^a-zA-Z0-9가-힣]/g,'');
       loadMyPosts(d.kw, mypostId);
+      loadTrend(d.kw, rankId);
     });
   }, 60);
 }
@@ -586,6 +685,16 @@ function card(d, i, maxT, rel) {
         <div class="comp-pill ${cCls}">${cTxt}</div>
       </div>
       <div class="kwcard-body">
+        <div class="trend-sec">
+          <div class="trend-header">
+            <div class="trend-lbl">📈 검색 트렌드 (최근 12개월)</div>
+            <div class="trend-badge trend-flat" id="badge-${rankId}">분석 중...</div>
+          </div>
+          <div class="trend-chart" id="trend-${rankId}">
+            <div class="trend-loading"><div class="rank-spinner"></div>트렌드 데이터 로딩 중...</div>
+          </div>
+          <div class="trend-summary" id="trend-sum-${rankId}"></div>
+        </div>
         <div class="sgrid">
           <div class="scell"><div class="slbl">PC 월간</div><div class="snum pc">${fmt(d.pc)}</div><div class="sunit">PC ${pcPct}%</div></div>
           <div class="scell"><div class="slbl">모바일 월간</div><div class="snum mo">${fmt(d.mo)}</div><div class="sunit">모바일 ${100-pcPct}%</div></div>
@@ -711,6 +820,70 @@ function showErr(html) {
 function log(type, msg) {
   document.getElementById('cdot').className = 'cdot' + (type ? ' '+type : '');
   document.getElementById('ctxt').textContent = msg;
+}
+
+// 트렌드 그래프 로드
+async function loadTrend(kw, rankId) {
+  const chartEl = document.getElementById('trend-' + rankId);
+  const badgeEl = document.getElementById('badge-' + rankId);
+  const sumEl   = document.getElementById('trend-sum-' + rankId);
+  if (!chartEl) return;
+
+  try {
+    const res  = await fetch('/api/trend', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ keyword: kw })
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || '오류');
+
+    const results = json.results?.[0]?.data || [];
+    if (results.length === 0) {
+      chartEl.innerHTML = '<div class="trend-loading">데이터 없음</div>';
+      return;
+    }
+
+    const values = results.map(d => d.ratio);
+    const maxVal = Math.max(...values, 1);
+    const recent3  = values.slice(-3);
+    const prev3    = values.slice(-6, -3);
+    const recentAvg = recent3.reduce((a,b) => a+b, 0) / recent3.length;
+    const prevAvg   = prev3.reduce((a,b)  => a+b, 0) / prev3.length;
+    const diff = ((recentAvg - prevAvg) / Math.max(prevAvg, 1)) * 100;
+
+    // 배지
+    let badgeCls, badgeTxt;
+    if (diff > 10)       { badgeCls = 'trend-up';   badgeTxt = `📈 상승 +${diff.toFixed(0)}%`; }
+    else if (diff < -10) { badgeCls = 'trend-down';  badgeTxt = `📉 하락 ${diff.toFixed(0)}%`; }
+    else                 { badgeCls = 'trend-flat';  badgeTxt = `➡️ 보합 ${diff.toFixed(0)}%`; }
+    badgeEl.className = 'trend-badge ' + badgeCls;
+    badgeEl.textContent = badgeTxt;
+
+    // 차트
+    chartEl.innerHTML = results.map((d, i) => {
+      const h    = Math.max(Math.round((d.ratio / maxVal) * 56), 2);
+      const isLast = i === results.length - 1;
+      const mon  = d.period.slice(5, 7) + '월';
+      return `
+        <div class="trend-bar-wrap" style="position:relative">
+          <div class="trend-bar ${isLast ? 'current' : 'past'}"
+            style="height:${h}px"
+            data-val="${d.ratio}">
+          </div>
+          ${i % 3 === 0 || isLast ? `<span class="trend-month">${mon}</span>` : ''}
+        </div>`;
+    }).join('');
+
+    // 요약
+    const peak = results.reduce((a,b) => a.ratio > b.ratio ? a : b);
+    const peakMon = peak.period.slice(0,7);
+    sumEl.innerHTML = `최고 검색량 <b>${peak.ratio.toFixed(1)}</b> (${peakMon}) · 전분기 대비 <b class="${diff>0?'':''}${diff>10?'trend-up':diff<-10?'trend-down':''}">${diff>0?'+':''}${diff.toFixed(0)}%</b>`;
+
+  } catch(e) {
+    chartEl.innerHTML = `<div class="trend-loading" style="color:var(--red)">트렌드 로드 실패</div>`;
+    console.error('trend error', e);
+  }
 }
 
 function exportCSV() {
